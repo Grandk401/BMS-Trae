@@ -12,7 +12,27 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api': {
+      '/login': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      },
+      '/userinfo': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      },
+      '/admin': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      },
+      '/librarian': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      },
+      '/reader': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      },
+      '/announcements': {
         target: 'http://localhost:8080',
         changeOrigin: true
       }

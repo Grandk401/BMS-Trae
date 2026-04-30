@@ -26,7 +26,7 @@ import java.util.List;
  * 系统管理员 - 图书管理 REST API 控制器
  */
 @RestController
-@RequestMapping("/api/admin/books")
+@RequestMapping("/admin/books")
 @CrossOrigin
 @Slf4j
 public class AdminBookController {

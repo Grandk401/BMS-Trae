@@ -23,7 +23,7 @@ import java.util.Map;
  * 用户认证 REST API 控制器
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("")
 @CrossOrigin
 @Slf4j
 public class AuthController {

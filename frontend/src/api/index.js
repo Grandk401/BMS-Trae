@@ -2,7 +2,7 @@ import axios from 'axios'
 import { getApiPrefix } from '../utils/permission'
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: '',
   timeout: 10000
 })
 
@@ -92,5 +92,12 @@ export const searchBorrowRecords = (params) => api.get('/admin/borrow-records/se
 
 // 查询逾期借阅记录
 export const getOverdueRecords = () => api.get('/admin/borrow-records/overdue')
+
+// 用户管理API（系统管理员专用）
+export const getUsers = () => api.get('/admin/users')
+export const getUserById = (id) => api.get(`/admin/users/${id}`)
+export const createUser = (data) => api.post('/admin/users', data)
+export const updateUserRole = (id, role) => api.put(`/admin/users/${id}/role`, null, { params: { role } })
+export const deleteUser = (id) => api.delete(`/admin/users/${id}`)
 
 export default api

@@ -26,7 +26,7 @@ import java.util.List;
  * 图书管理员 - 借阅记录 REST API 控制器
  */
 @RestController
-@RequestMapping("/api/librarian/borrow-records")
+@RequestMapping("/librarian/borrow-records")
 @CrossOrigin
 @Slf4j
 public class LibrarianBorrowRecordController {

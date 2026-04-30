@@ -184,4 +184,44 @@ public class UserService {
         userMapper.deleteById(userId);
         log.info("删除用户: userId={}", userId);
     }
+
+    /**
+     * 创建新用户
+     * <p>
+     * 系统管理员可创建新用户，密码会使用BCrypt加密存储。
+     * </p>
+     *
+     * @param username 用户名
+     * @param password 密码（明文）
+     * @param role     角色（ADMIN、LIBRARIAN、READER）
+     * @return 创建的用户对象
+     * @throws BusinessException 用户已存在或角色无效时抛出
+     */
+    public User createUser(String username, String password, String role) {
+        // 检查用户名是否已存在
+        if (userMapper.findByUsername(username) != null) {
+            log.warn("创建用户失败: 用户名已存在, username={}", username);
+            throw BusinessException.operationFailure("用户名已存在");
+        }
+
+        // 验证角色有效性
+        try {
+            Role.valueOf(role);
+        } catch (IllegalArgumentException e) {
+            throw BusinessException.operationFailure("无效的角色: " + role);
+        }
+
+        // 创建用户对象
+        User user = new User();
+        user.setUsername(username);
+        // 使用BCrypt加密密码
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole(role);
+
+        // 插入数据库
+        userMapper.insert(user);
+        log.info("创建用户成功: username={}, role={}, userId={}", username, role, user.getId());
+        
+        return user;
+    }
 }

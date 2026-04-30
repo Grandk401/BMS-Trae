@@ -28,7 +28,7 @@ import java.util.List;
  * 普通读者 - 借阅记录 REST API 控制器
  */
 @RestController
-@RequestMapping("/api/reader/borrow-records")
+@RequestMapping("/reader/borrow-records")
 @CrossOrigin
 @Slf4j
 public class ReaderBorrowRecordController {

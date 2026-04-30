@@ -55,9 +55,10 @@ public class SecurityConfig {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeRequests()
-                .antMatchers("/api/login", "/api/register").permitAll()
-                .antMatchers("/api/reader/books").permitAll()
-                .antMatchers("/api/reader/borrow-records/**").permitAll()
+                .antMatchers("/login", "/register").permitAll()
+                .antMatchers("/reader/books").permitAll()
+                .antMatchers("/reader/borrow-records/**").permitAll()
+                .antMatchers("/announcements").permitAll()
                 .anyRequest().authenticated()
             .and()
             .exceptionHandling();

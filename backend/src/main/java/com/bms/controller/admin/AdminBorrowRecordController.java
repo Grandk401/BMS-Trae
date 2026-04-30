@@ -28,7 +28,7 @@ import java.util.List;
  * 系统管理员 - 借阅记录 REST API 控制器
  */
 @RestController
-@RequestMapping("/api/admin/borrow-records")
+@RequestMapping("/admin/borrow-records")
 @CrossOrigin
 @Slf4j
 public class AdminBorrowRecordController {

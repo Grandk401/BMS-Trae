@@ -26,7 +26,7 @@ import java.util.List;
  * 图书管理员 - 图书管理 REST API 控制器
  */
 @RestController
-@RequestMapping("/api/librarian/books")
+@RequestMapping("/librarian/books")
 @CrossOrigin
 @Slf4j
 public class LibrarianBookController {

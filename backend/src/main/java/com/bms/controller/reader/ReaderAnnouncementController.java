@@ -26,7 +26,7 @@ import java.util.List;
  * 读者公告控制器
  */
 @RestController
-@RequestMapping("/api/reader/announcements")
+@RequestMapping("/reader/announcements")
 @Slf4j
 public class ReaderAnnouncementController {
 

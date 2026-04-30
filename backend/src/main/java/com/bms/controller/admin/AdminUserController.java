@@ -88,4 +88,23 @@ public class AdminUserController {
         userService.deleteUser(id);
         return Result.success();
     }
+
+    /**
+     * 创建新用户
+     * <p>
+     * 系统管理员可创建新用户账号，密码会使用BCrypt加密后存储。
+     * </p>
+     *
+     * @param username 用户名
+     * @param password 密码（明文）
+     * @param role     角色（ADMIN、LIBRARIAN、READER）
+     * @return 创建的用户信息
+     */
+    @PostMapping
+    @PreAuthorize("hasAuthority('user:create')")
+    public Result<User> createUser(@RequestBody User user) {
+        User createdUser = userService.createUser(user.getUsername(), user.getPassword(), 
+                user.getRole() != null ? user.getRole() : "READER");
+        return Result.success(createdUser);
+    }
 }

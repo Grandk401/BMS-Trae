@@ -24,7 +24,7 @@ import java.util.List;
  * 公告管理控制器
  */
 @RestController
-@RequestMapping("/api/announcements")
+@RequestMapping("/announcements")
 @Slf4j
 public class AnnouncementController {
 

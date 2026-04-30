@@ -24,7 +24,7 @@ import java.util.List;
  * 普通读者 - 图书 REST API 控制器
  */
 @RestController
-@RequestMapping("/api/reader/books")
+@RequestMapping("/reader/books")
 @CrossOrigin
 @Slf4j
 public class ReaderBookController {
