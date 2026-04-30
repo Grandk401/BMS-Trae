@@ -1,0 +1,12 @@
+### 敏感信息配置文件模板 ###
+### 复制此文件为 application-private.yml 并填入实际值 ###
+### application-private.yml 不应上传到版本控制 ###
+
+# 数据库配置
+db:
+  username: your_username_here
+  password: your_password_here
+
+# JWT 配置
+jwt:
+  secret: your_jwt_secret_here

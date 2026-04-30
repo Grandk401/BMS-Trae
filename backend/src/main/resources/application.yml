@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    com.bms: INFO
+    org.mybatis: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/bms-backend.log
+
+spring:
+  application:
+    name: bms-backend
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/bms?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: ${db.username}
+    password: ${db.password}
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.bms.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+jwt:
+  secret: ${jwt.secret}
+  expiration: 86400000
+
+# 引入外部敏感配置文件
+spring.config.import: optional:application-private.yml

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bms.mapper.AnnouncementMapper">
+
+    <resultMap id="BaseResultMap" type="com.bms.entity.Announcement">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="enabled" property="enabled"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.bms.entity.Announcement">
+        INSERT INTO announcement (title, content, enabled, sort_order, create_time, update_time)
+        VALUES (#{title}, #{content}, #{enabled}, #{sortOrder}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="com.bms.entity.Announcement">
+        UPDATE announcement
+        SET title = #{title},
+            content = #{content},
+            enabled = #{enabled},
+            sort_order = #{sortOrder},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        DELETE FROM announcement WHERE id = #{id}
+    </delete>
+
+    <select id="findById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT * FROM announcement WHERE id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT * FROM announcement ORDER BY sort_order ASC, create_time DESC
+    </select>
+
+    <select id="findEnabled" resultMap="BaseResultMap">
+        SELECT * FROM announcement WHERE enabled = TRUE ORDER BY sort_order ASC, create_time DESC
+    </select>
+
+    <select id="findByTitleLike" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT * FROM announcement WHERE title LIKE CONCAT('%', #{title}, '%') ORDER BY sort_order ASC, create_time DESC
+    </select>
+
+</mapper>
