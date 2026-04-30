@@ -17,10 +17,27 @@
       <el-table :data="userList" border style="width: 100%">
         <el-table-column prop="id" label="用户ID" width="80" />
         <el-table-column prop="username" label="用户名" />
-        <el-table-column prop="role" label="角色" />
-        <el-table-column label="操作" width="150">
+        <el-table-column label="角色" width="150">
           <template #default="scope">
-            <el-button size="small" @click="handleDelete(scope.row.id)">删除</el-button>
+            <el-select 
+              v-model="scope.row.role" 
+              @change="handleRoleChange(scope.row)"
+              size="small"
+              :disabled="scope.row.username === 'admin'"
+            >
+              <el-option label="系统管理员" value="ADMIN" />
+              <el-option label="图书管理员" value="LIBRARIAN" />
+              <el-option label="读者" value="READER" />
+            </el-select>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="80">
+          <template #default="scope">
+            <el-button 
+              size="small" 
+              @click="handleDelete(scope.row.id)"
+              :disabled="scope.row.username === 'admin'"
+            >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -58,7 +75,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getUsers, createUser, deleteUser } from '../api'
+import { getUsers, createUser, updateUserRole, deleteUser } from '../api'
 
 const userList = ref([])
 const showCreateDialog = ref(false)
@@ -70,6 +87,17 @@ const formData = ref({
 
 const handleCreateClick = () => {
   showCreateDialog.value = true
+}
+
+const handleRoleChange = async (row) => {
+  try {
+    await updateUserRole(row.id, row.role)
+    ElMessage.success('角色修改成功')
+  } catch (error) {
+    ElMessage.error('角色修改失败: ' + error.message)
+    // 恢复原来的角色
+    loadUsers()
+  }
 }
 
 const loadUsers = async () => {
