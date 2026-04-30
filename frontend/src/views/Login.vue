@@ -70,13 +70,8 @@ const handleLogin = async () => {
           localStorage.setItem('role', res.data.user.role || 'READER')
           ElMessage.success(res.message)
 
-          // 根据角色跳转到对应页面
-          const role = res.data.user.role
-          if (role === 'READER') {
-            router.push('/dashboard/reader-borrow')
-          } else {
-            router.push('/dashboard')
-          }
+          // 登录成功后跳转到首页
+          router.push('/dashboard')
         } else {
           ElMessage.error(res.message || '登录失败')
         }
