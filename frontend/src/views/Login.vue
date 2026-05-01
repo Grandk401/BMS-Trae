@@ -1,5 +1,5 @@
 <template>
-  <div class="login-container">
+  <div class="login-container" @keyup.enter="handleLogin">
     <el-card class="login-card">
       <h2 class="title">图书管理系统</h2>
       <el-form :model="loginForm" :rules="rules" ref="loginFormRef">
@@ -16,7 +16,6 @@
             type="password"
             placeholder="密码"
             prefix-icon="Lock"
-            @keyup.enter="handleLogin"
           />
         </el-form-item>
         <el-form-item>
