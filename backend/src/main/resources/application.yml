@@ -34,7 +34,7 @@ mybatis:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 jwt:
-  secret: ${jwt.secret}
+  secret: bmsSecretKey2024BookManagementSystem
   expiration: 86400000
 
 # 引入外部敏感配置文件

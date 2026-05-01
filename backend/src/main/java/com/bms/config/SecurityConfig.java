@@ -4,6 +4,7 @@
 package com.bms.config;
 
 import com.bms.security.JwtAuthenticationFilter;
+import com.bms.security.UserContextCleanupFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final UserContextCleanupFilter userContextCleanupFilter;
 
     /**
      * 配置密码编码器
@@ -54,6 +56,7 @@ public class SecurityConfig {
             .csrf().disable()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(userContextCleanupFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeRequests()
                 .antMatchers("/login", "/register").permitAll()
                 .antMatchers("/reader/books").permitAll()

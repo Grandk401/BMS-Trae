@@ -17,13 +17,13 @@ import com.bms.entity.BorrowStatus;
 import com.bms.exception.BusinessException;
 import com.bms.mapper.BookMapper;
 import com.bms.mapper.BorrowRecordMapper;
+import com.bms.util.UserContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -146,7 +146,8 @@ public class BorrowRecordService {
      */
     @Transactional
     public BorrowRecord approveBorrow(Integer recordId) {
-        log.info("管理员同意借阅申请: recordId={}", recordId);
+        Integer operatorId = UserContext.getUserId();
+        log.info("管理员同意借阅申请: recordId={}, operatorId={}", recordId, operatorId);
 
         BorrowRecord record = borrowRecordMapper.findById(recordId);
         if (record == null) {
@@ -159,21 +160,21 @@ public class BorrowRecordService {
             throw BusinessException.invalidStatus();
         }
 
-        // 更新状态为借阅中
         record.setStatus(BorrowStatus.BORROWING.name());
+        record.setOperatorId(operatorId);
         int rows = borrowRecordMapper.update(record);
         if (rows <= 0) {
             log.warn("同意借阅失败: 更新状态失败, recordId={}", recordId);
             throw BusinessException.dbOperationFailure();
         }
 
-        log.info("同意借阅成功: recordId={}, status=BORROWING", recordId);
+        log.info("同意借阅成功: recordId={}, status=BORROWING, operatorId={}", recordId, operatorId);
         return borrowRecordMapper.findByIdWithInfo(recordId);
     }
 
     /**
      * 管理员拒绝借阅申请
-     * 
+     *
      * 拒绝后需要恢复库存
      *
      * @param recordId 借阅记录ID
@@ -181,7 +182,8 @@ public class BorrowRecordService {
      */
     @Transactional
     public BorrowRecord rejectBorrow(Integer recordId) {
-        log.info("管理员拒绝借阅申请: recordId={}", recordId);
+        Integer operatorId = UserContext.getUserId();
+        log.info("管理员拒绝借阅申请: recordId={}, operatorId={}", recordId, operatorId);
 
         BorrowRecord record = borrowRecordMapper.findById(recordId);
         if (record == null) {
@@ -194,7 +196,6 @@ public class BorrowRecordService {
             throw BusinessException.invalidStatus();
         }
 
-        // 恢复库存
         Book book = bookMapper.findById(record.getBookId());
         if (book != null) {
             book.setStock(book.getStock() + 1);
@@ -202,8 +203,8 @@ public class BorrowRecordService {
             log.info("恢复库存成功: bookId={}, stock={}", record.getBookId(), book.getStock());
         }
 
-        // 更新状态为已拒绝
         record.setStatus(BorrowStatus.REJECTED.name());
+        record.setOperatorId(operatorId);
         int rows = borrowRecordMapper.update(record);
         if (rows <= 0) {
             log.warn("拒绝借阅失败: 更新状态失败, recordId={}", recordId);
@@ -216,7 +217,7 @@ public class BorrowRecordService {
 
     /**
      * 管理员确认归还
-     * 
+     *
      * 业务逻辑：
      * 1. 如果已过应归还日期，状态设为"已逾期但已归还"
      * 2. 否则状态设为"已归还"
@@ -227,7 +228,8 @@ public class BorrowRecordService {
      */
     @Transactional
     public BorrowRecord confirmReturn(Integer recordId) {
-        log.info("管理员确认归还: recordId={}", recordId);
+        Integer operatorId = UserContext.getUserId();
+        log.info("管理员确认归还: recordId={}, operatorId={}", recordId, operatorId);
 
         BorrowRecord record = borrowRecordMapper.findById(recordId);
         if (record == null) {
@@ -236,17 +238,15 @@ public class BorrowRecordService {
         }
 
         String currentStatus = record.getStatus();
-        if (!BorrowStatus.BORROWING.name().equals(currentStatus) && 
+        if (!BorrowStatus.BORROWING.name().equals(currentStatus) &&
             !BorrowStatus.OVERDUE.name().equals(currentStatus)) {
             log.warn("确认归还失败: 记录状态不是借阅中或已逾期, recordId={}, status={}", recordId, currentStatus);
             throw BusinessException.invalidStatus();
         }
 
-        // 检查是否逾期
         LocalDateTime now = LocalDateTime.now();
         boolean isOverdue = record.getDueDate() != null && record.getDueDate().isBefore(now);
-        
-        // 恢复库存
+
         Book book = bookMapper.findById(record.getBookId());
         if (book != null) {
             book.setStock(book.getStock() + 1);
@@ -258,13 +258,14 @@ public class BorrowRecordService {
         String newStatus = isOverdue ? BorrowStatus.OVERDUE_RETURNED.name() : BorrowStatus.RETURNED.name();
         record.setStatus(newStatus);
         record.setReturnDate(now);
+        record.setOperatorId(operatorId);
         int rows = borrowRecordMapper.update(record);
         if (rows <= 0) {
             log.warn("确认归还失败: 更新状态失败, recordId={}", recordId);
             throw BusinessException.dbOperationFailure();
         }
 
-        log.info("确认归还成功: recordId={}, status={}, isOverdue={}", recordId, newStatus, isOverdue);
+        log.info("确认归还成功: recordId={}, status={}, isOverdue={}, operatorId={}", recordId, newStatus, isOverdue, operatorId);
         return borrowRecordMapper.findByIdWithInfo(recordId);
     }
 
@@ -278,7 +279,8 @@ public class BorrowRecordService {
      */
     @Transactional
     public BorrowRecord markOverdue(Integer recordId) {
-        log.info("管理员标记逾期未归还: recordId={}", recordId);
+        Integer operatorId = UserContext.getUserId();
+        log.info("管理员标记逾期未归还: recordId={}, operatorId={}", recordId, operatorId);
 
         BorrowRecord record = borrowRecordMapper.findById(recordId);
         if (record == null) {
@@ -291,20 +293,20 @@ public class BorrowRecordService {
             throw BusinessException.invalidStatus();
         }
 
-        // 检查是否确实已逾期
         if (!record.getDueDate().isBefore(LocalDateTime.now())) {
             log.warn("标记逾期失败: 尚未逾期, recordId={}, dueDate={}", recordId, record.getDueDate());
             throw BusinessException.invalidOperation("尚未逾期，无法标记为逾期");
         }
 
         record.setStatus(BorrowStatus.OVERDUE.name());
+        record.setOperatorId(operatorId);
         int rows = borrowRecordMapper.update(record);
         if (rows <= 0) {
             log.warn("标记逾期失败: 更新状态失败, recordId={}", recordId);
             throw BusinessException.dbOperationFailure();
         }
 
-        log.info("标记逾期成功: recordId={}, status=OVERDUE", recordId);
+        log.info("标记逾期成功: recordId={}, status=OVERDUE, operatorId={}", recordId, operatorId);
         return borrowRecordMapper.findByIdWithInfo(recordId);
     }
 

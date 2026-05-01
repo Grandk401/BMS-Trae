@@ -5,6 +5,7 @@ package com.bms.security;
 
 import com.bms.common.Permission;
 import com.bms.common.Role;
+import com.bms.util.UserContext;
 import com.bms.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 if (username != null && jwtUtils.validateToken(jwt, username)) {
                     Role role = jwtUtils.getRoleFromToken(jwt);
+                    Integer userId = jwtUtils.getUserIdFromToken(jwt);
                     List<String> permissionCodes = jwtUtils.getPermissionsFromToken(jwt);
 
                     List<SimpleGrantedAuthority> authorities = new ArrayList<>();
@@ -61,7 +63,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                    log.debug("用户认证成功: username={}, role={}, permissions={}", username, role, permissionCodes);
+
+                    UserContext.setUserId(userId);
+                    UserContext.setUsername(username);
+                    UserContext.setRole(role.name());
+
+                    log.debug("用户认证成功: username={}, userId={}, role={}, permissions={}", username, userId, role, permissionCodes);
                 }
             }
         } catch (Exception ex) {

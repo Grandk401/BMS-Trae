@@ -48,6 +48,22 @@ public class JwtUtils {
         return createToken(claims, username);
     }
 
+    public String generateToken(String username, Integer userId, Role role, Permission[] permissions) {
+        log.info("生成 JWT Token: username={}, userId={}, role={}", username, userId, role);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("username", username);
+        claims.put("userId", userId);
+        claims.put("role", role.name());
+
+        List<String> permissionCodes = new ArrayList<>();
+        for (Permission p : permissions) {
+            permissionCodes.add(p.getCode());
+        }
+        claims.put("permissions", permissionCodes);
+
+        return createToken(claims, username);
+    }
+
     private String createToken(Map<String, Object> claims, String subject) {
         Date now = new Date();
         Date expirationDate = new Date(now.getTime() + expiration);
@@ -63,6 +79,11 @@ public class JwtUtils {
 
     public String getUsernameFromToken(String token) {
         return getClaimsFromToken(token).getSubject();
+    }
+
+    public Integer getUserIdFromToken(String token) {
+        Claims claims = getClaimsFromToken(token);
+        return claims.get("userId", Integer.class);
     }
 
     public Role getRoleFromToken(String token) {

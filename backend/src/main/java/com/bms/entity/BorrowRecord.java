@@ -74,6 +74,11 @@ public class BorrowRecord implements Serializable {
     private String remark;
 
     /**
+     * 操作员ID（记录执行借阅操作的管理员ID）
+     */
+    private Integer operatorId;
+
+    /**
      * 用户名（用于关联查询）
      */
     private transient String username;

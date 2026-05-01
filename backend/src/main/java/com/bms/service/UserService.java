@@ -66,7 +66,7 @@ public class UserService {
         }
 
         Role role = Role.valueOf(user.getRole());
-        String token = jwtUtils.generateToken(username, role, role.getPermissions());
+        String token = jwtUtils.generateToken(username, user.getId(), role, role.getPermissions());
         log.info("用户登录成功: username={}, userId={}, role={}", username, user.getId(), role);
 
         result.put("success", true);
