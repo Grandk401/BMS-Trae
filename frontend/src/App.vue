@@ -4,7 +4,20 @@
 
 <script>
 export default {
-  name: 'App'
+  name: 'App',
+  mounted() {
+    document.addEventListener('keyup', this.handleEscKey)
+  },
+  beforeUnmount() {
+    document.removeEventListener('keyup', this.handleEscKey)
+  },
+  methods: {
+    handleEscKey(event) {
+      if (event.key === 'Escape') {
+        this.$router.push('/dashboard')
+      }
+    }
+  }
 }
 </script>
 

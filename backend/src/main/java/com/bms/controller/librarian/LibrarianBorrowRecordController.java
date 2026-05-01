@@ -99,4 +99,30 @@ public class LibrarianBorrowRecordController {
         borrowRecordService.deleteRecord(id);
         return Result.success("删除成功", null);
     }
+
+    /**
+     * 同意续借申请
+     *
+     * @param id 借阅记录 ID
+     * @return 更新后的借阅记录
+     */
+    @PutMapping("/{id}/approve-renew")
+    public Result<BorrowRecord> approveRenew(@PathVariable Integer id) {
+        log.info("图书管理员 - 同意续借申请: recordId={}", id);
+        BorrowRecord record = borrowRecordService.approveRenew(id);
+        return Result.success("同意续借成功", record);
+    }
+
+    /**
+     * 拒绝续借申请
+     *
+     * @param id 借阅记录 ID
+     * @return 更新后的借阅记录
+     */
+    @PutMapping("/{id}/reject-renew")
+    public Result<BorrowRecord> rejectRenew(@PathVariable Integer id) {
+        log.info("图书管理员 - 拒绝续借申请: recordId={}", id);
+        BorrowRecord record = borrowRecordService.rejectRenew(id);
+        return Result.success("拒绝续借成功", record);
+    }
 }

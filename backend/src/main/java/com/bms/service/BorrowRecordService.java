@@ -538,4 +538,137 @@ public class BorrowRecordService {
         log.info("查询到用户借阅记录数量: {}", result.size());
         return result;
     }
+
+    /**
+     * 读者申请续借
+     *
+     * 业务逻辑：
+     * 1. 只能对借阅中的记录申请续借
+     * 2. 续借后状态变为待续借审核
+     *
+     * @param recordId 借阅记录ID
+     * @param userId 用户ID
+     * @return 更新后的借阅记录
+     */
+    @Transactional
+    public BorrowRecord applyRenew(Integer recordId, Integer userId) {
+        log.info("读者申请续借: recordId={}, userId={}", recordId, userId);
+
+        BorrowRecord record = borrowRecordMapper.findById(recordId);
+        if (record == null) {
+            log.warn("续借申请失败: 记录不存在, recordId={}", recordId);
+            throw BusinessException.recordNotFound();
+        }
+
+        if (!record.getUserId().equals(userId)) {
+            log.warn("续借申请失败: 无权操作此记录, recordId={}, userId={}, recordUserId={}",
+                    recordId, userId, record.getUserId());
+            throw new BusinessException("无权操作此记录");
+        }
+
+        if (!BorrowStatus.BORROWING.name().equals(record.getStatus()) &&
+            !BorrowStatus.OVERDUE.name().equals(record.getStatus())) {
+            log.warn("续借申请失败: 记录状态不是借阅中或已逾期, recordId={}, status={}",
+                    recordId, record.getStatus());
+            throw BusinessException.invalidStatus();
+        }
+
+        record.setStatus(BorrowStatus.RENEW_PENDING.name());
+        int rows = borrowRecordMapper.update(record);
+        if (rows <= 0) {
+            log.warn("续借申请失败: 更新状态失败, recordId={}", recordId);
+            throw BusinessException.dbOperationFailure();
+        }
+
+        log.info("续借申请成功: recordId={}, status=RENEW_PENDING", recordId);
+        return borrowRecordMapper.findByIdWithInfo(recordId);
+    }
+
+    /**
+     * 管理员审批同意续借
+     *
+     * 业务逻辑：
+     * 1. 将应归还日期延长45天
+     * 2. 续借次数加1
+     * 3. 状态恢复为借阅中
+     *
+     * @param recordId 借阅记录ID
+     * @return 更新后的借阅记录
+     */
+    @Transactional
+    public BorrowRecord approveRenew(Integer recordId) {
+        Integer operatorId = UserContext.getUserId();
+        log.info("管理员同意续借: recordId={}, operatorId={}", recordId, operatorId);
+
+        BorrowRecord record = borrowRecordMapper.findById(recordId);
+        if (record == null) {
+            log.warn("同意续借失败: 记录不存在, recordId={}", recordId);
+            throw BusinessException.recordNotFound();
+        }
+
+        if (!BorrowStatus.RENEW_PENDING.name().equals(record.getStatus())) {
+            log.warn("同意续借失败: 记录状态不是待续借审核, recordId={}, status={}",
+                    recordId, record.getStatus());
+            throw BusinessException.invalidStatus();
+        }
+
+        // 延长应归还日期45天
+        record.setDueDate(record.getDueDate().plusDays(BORROW_DAYS));
+        // 续借次数加1
+        int renewCount = record.getRenewalCount() == null ? 1 : record.getRenewalCount() + 1;
+        record.setRenewalCount(renewCount);
+        // 状态恢复为借阅中
+        record.setStatus(BorrowStatus.BORROWING.name());
+        record.setOperatorId(operatorId);
+
+        int rows = borrowRecordMapper.update(record);
+        if (rows <= 0) {
+            log.warn("同意续借失败: 更新状态失败, recordId={}", recordId);
+            throw BusinessException.dbOperationFailure();
+        }
+
+        log.info("同意续借成功: recordId={}, status=BORROWING, dueDate={}, renewalCount={}, operatorId={}",
+                recordId, record.getDueDate(), renewCount, operatorId);
+        return borrowRecordMapper.findByIdWithInfo(recordId);
+    }
+
+    /**
+     * 管理员审批拒绝续借
+     *
+     * 业务逻辑：
+     * 1. 状态变为续借被拒绝
+     * 2. 记录操作员ID
+     *
+     * @param recordId 借阅记录ID
+     * @return 更新后的借阅记录
+     */
+    @Transactional
+    public BorrowRecord rejectRenew(Integer recordId) {
+        Integer operatorId = UserContext.getUserId();
+        log.info("管理员拒绝续借: recordId={}, operatorId={}", recordId, operatorId);
+
+        BorrowRecord record = borrowRecordMapper.findById(recordId);
+        if (record == null) {
+            log.warn("拒绝续借失败: 记录不存在, recordId={}", recordId);
+            throw BusinessException.recordNotFound();
+        }
+
+        if (!BorrowStatus.RENEW_PENDING.name().equals(record.getStatus())) {
+            log.warn("拒绝续借失败: 记录状态不是待续借审核, recordId={}, status={}",
+                    recordId, record.getStatus());
+            throw BusinessException.invalidStatus();
+        }
+
+        record.setStatus(BorrowStatus.RENEW_REJECTED.name());
+        record.setOperatorId(operatorId);
+
+        int rows = borrowRecordMapper.update(record);
+        if (rows <= 0) {
+            log.warn("拒绝续借失败: 更新状态失败, recordId={}", recordId);
+            throw BusinessException.dbOperationFailure();
+        }
+
+        log.info("拒绝续借成功: recordId={}, status=RENEW_REJECTED, operatorId={}", recordId, operatorId);
+        return borrowRecordMapper.findByIdWithInfo(recordId);
+    }
 }

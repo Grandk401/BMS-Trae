@@ -151,6 +151,32 @@ public class AdminBorrowRecordController {
     }
 
     /**
+     * 同意续借申请
+     *
+     * @param id 借阅记录 ID
+     * @return 更新后的借阅记录
+     */
+    @PutMapping("/{id}/approve-renew")
+    public Result<BorrowRecord> approveRenew(@PathVariable Integer id) {
+        log.info("系统管理员 - 同意续借申请: recordId={}", id);
+        BorrowRecord record = borrowRecordService.approveRenew(id);
+        return Result.success("同意续借成功", record);
+    }
+
+    /**
+     * 拒绝续借申请
+     *
+     * @param id 借阅记录 ID
+     * @return 更新后的借阅记录
+     */
+    @PutMapping("/{id}/reject-renew")
+    public Result<BorrowRecord> rejectRenew(@PathVariable Integer id) {
+        log.info("系统管理员 - 拒绝续借申请: recordId={}", id);
+        BorrowRecord record = borrowRecordService.rejectRenew(id);
+        return Result.success("拒绝续借成功", record);
+    }
+
+    /**
      * 添加新借阅记录（管理员直接添加）
      *
      * @param record 借阅记录对象

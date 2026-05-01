@@ -64,14 +64,18 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right" width="300">
           <template #default="scope">
-            <el-button size="small" type="success" @click="handleApprove(scope.row)" 
+            <el-button size="small" type="success" @click="handleApprove(scope.row)"
                        v-if="scope.row.status === 'PENDING'">同意</el-button>
-            <el-button size="small" type="danger" @click="handleReject(scope.row)" 
+            <el-button size="small" type="danger" @click="handleReject(scope.row)"
                        v-if="scope.row.status === 'PENDING'">拒绝</el-button>
-            <el-button size="small" type="primary" @click="handleConfirmReturn(scope.row)" 
+            <el-button size="small" type="primary" @click="handleConfirmReturn(scope.row)"
                        v-if="scope.row.status === 'BORROWING' || scope.row.status === 'OVERDUE'">已归还</el-button>
-            <el-button size="small" type="warning" @click="handleMarkOverdue(scope.row)" 
+            <el-button size="small" type="warning" @click="handleMarkOverdue(scope.row)"
                        v-if="scope.row.status === 'BORROWING' && isOverdue(scope.row)">已逾期未归还</el-button>
+            <el-button size="small" type="success" @click="handleApproveRenew(scope.row)"
+                       v-if="scope.row.status === 'RENEW_PENDING'">同意续借</el-button>
+            <el-button size="small" type="danger" @click="handleRejectRenew(scope.row)"
+                       v-if="scope.row.status === 'RENEW_PENDING'">拒绝续借</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -82,7 +86,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getBorrowRecords, approveBorrow, rejectBorrow, confirmReturn, markOverdue, searchBorrowRecords } from '@/api'
+import { getBorrowRecords, approveBorrow, rejectBorrow, confirmReturn, markOverdue, searchBorrowRecords, approveRenew, rejectRenew } from '@/api'
 
 const loading = ref(false)
 const records = ref([])
@@ -193,6 +197,34 @@ const handleMarkOverdue = async (row) => {
   }
 }
 
+const handleApproveRenew = async (row) => {
+  try {
+    const res = await approveRenew(row.id)
+    if (res.success) {
+      ElMessage.success(res.message)
+      fetchRecords()
+    } else {
+      ElMessage.error(res.message)
+    }
+  } catch (error) {
+    ElMessage.error('操作失败')
+  }
+}
+
+const handleRejectRenew = async (row) => {
+  try {
+    const res = await rejectRenew(row.id)
+    if (res.success) {
+      ElMessage.success(res.message)
+      fetchRecords()
+    } else {
+      ElMessage.error(res.message)
+    }
+  } catch (error) {
+    ElMessage.error('操作失败')
+  }
+}
+
 const formatDateTime = (dateTime) => {
   if (!dateTime) return '-'
   const date = new Date(dateTime)
@@ -206,7 +238,10 @@ const getStatusText = (status) => {
     'RETURNED': '已归还',
     'OVERDUE': '已逾期',
     'OVERDUE_RETURNED': '已逾期但已归还',
-    'REJECTED': '已拒绝'
+    'REJECTED': '已拒绝',
+    'RENEW_PENDING': '待续借审核',
+    'RENEWED': '已续借',
+    'RENEW_REJECTED': '续借被拒绝'
   }
   return statusMap[status] || status
 }
@@ -218,13 +253,18 @@ const getStatusType = (status) => {
     'RETURNED': 'success',
     'OVERDUE': 'danger',
     'OVERDUE_RETURNED': 'danger',
-    'REJECTED': 'default'
+    'REJECTED': 'default',
+    'RENEW_PENDING': 'warning',
+    'RENEWED': 'success',
+    'RENEW_REJECTED': 'default'
   }
   return typeMap[status] || 'default'
 }
 
 const isOverdue = (row) => {
-  if (!row.dueDate || row.status === 'RETURNED' || row.status === 'OVERDUE_RETURNED' || row.status === 'REJECTED') {
+  if (!row.dueDate || row.status === 'RETURNED' || row.status === 'OVERDUE_RETURNED' ||
+      row.status === 'REJECTED' || row.status === 'RENEW_PENDING' || row.status === 'RENEWED' ||
+      row.status === 'RENEW_REJECTED') {
     return false
   }
   return new Date(row.dueDate) < new Date()

@@ -85,4 +85,21 @@ public class ReaderBorrowRecordController {
         BorrowRecord savedRecord = borrowRecordService.applyBorrow(bookId, user.getId());
         return Result.success("借阅申请成功，请等待管理员审核", savedRecord);
     }
+
+    /**
+     * 申请续借图书
+     *
+     * @param id 借阅记录ID
+     * @return 更新后的借阅记录
+     */
+    @PutMapping("/{id}/renew")
+    public Result<BorrowRecord> applyRenew(@PathVariable Integer id) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.getUserByUsername(username);
+        
+        log.info("普通读者 - 申请续借: username={}, userId={}, recordId={}", username, user.getId(), id);
+        
+        BorrowRecord record = borrowRecordService.applyRenew(id, user.getId());
+        return Result.success("续借申请成功，请等待管理员审核", record);
+    }
 }

@@ -81,11 +81,18 @@ export const deleteBorrowRecord = (id) => api.delete(getFullPath(`/borrow-record
 // 读者申请借阅
 export const applyBorrow = (bookId) => api.post(`/reader/borrow-records/apply/${bookId}`)
 
+// 读者申请续借
+export const applyRenew = (recordId) => api.put(`/reader/borrow-records/${recordId}/renew`)
+
 // 管理员借阅操作API
 export const approveBorrow = (id) => api.put(`/admin/borrow-records/${id}/approve`)
 export const rejectBorrow = (id) => api.put(`/admin/borrow-records/${id}/reject`)
 export const confirmReturn = (id) => api.put(`/admin/borrow-records/${id}/return`)
 export const markOverdue = (id) => api.put(`/admin/borrow-records/${id}/mark-overdue`)
+
+// 管理员续借审批API
+export const approveRenew = (id) => api.put(`/admin/borrow-records/${id}/approve-renew`)
+export const rejectRenew = (id) => api.put(`/admin/borrow-records/${id}/reject-renew`)
 
 // 搜索借阅记录
 export const searchBorrowRecords = (params) => api.get('/admin/borrow-records/search', { params })

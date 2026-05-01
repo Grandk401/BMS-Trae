@@ -75,7 +75,7 @@ public interface BorrowRecordMapper {
      */
     @Update("UPDATE borrow_record SET book_id=#{bookId}, user_id=#{userId}, " +
             "borrow_date=#{borrowDate}, due_date=#{dueDate}, return_date=#{returnDate}, " +
-            "status=#{status}, remark=#{remark}, operator_id=#{operatorId} WHERE id=#{id}")
+            "status=#{status}, remark=#{remark}, operator_id=#{operatorId}, renewal_count=#{renewalCount} WHERE id=#{id}")
     int update(BorrowRecord record);
 
     /**

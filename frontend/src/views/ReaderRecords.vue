@@ -36,6 +36,14 @@
           </template>
         </el-table-column>
         <el-table-column prop="remark" label="备注" />
+        <el-table-column label="操作" fixed="right" width="120">
+          <template #default="scope">
+            <el-button size="small" type="warning" @click="handleRenew(scope.row)"
+                       v-if="scope.row.status === 'BORROWING' || scope.row.status === 'OVERDUE'">
+              续借
+            </el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </el-card>
   </div>
@@ -44,10 +52,24 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getBorrowRecords } from '@/api'
+import { getBorrowRecords, applyRenew } from '@/api'
 
 const loading = ref(false)
 const records = ref([])
+
+const handleRenew = async (row) => {
+  try {
+    const res = await applyRenew(row.id)
+    if (res.success) {
+      ElMessage.success(res.message)
+      fetchRecords()
+    } else {
+      ElMessage.error(res.message)
+    }
+  } catch (error) {
+    ElMessage.error('续借申请失败')
+  }
+}
 
 const getStatusType = (status) => {
   const types = {
@@ -56,7 +78,10 @@ const getStatusType = (status) => {
     RETURNED: 'success',
     OVERDUE: 'danger',
     OVERDUE_RETURNED: 'danger',
-    REJECTED: 'default'
+    REJECTED: 'default',
+    RENEW_PENDING: 'warning',
+    RENEWED: 'success',
+    RENEW_REJECTED: 'default'
   }
   return types[status] || 'info'
 }
@@ -68,7 +93,10 @@ const getStatusText = (status) => {
     RETURNED: '已归还',
     OVERDUE: '已逾期',
     OVERDUE_RETURNED: '已逾期但已归还',
-    REJECTED: '已拒绝'
+    REJECTED: '已拒绝',
+    RENEW_PENDING: '待续借审核',
+    RENEWED: '已续借',
+    RENEW_REJECTED: '续借被拒绝'
   }
   return texts[status] || status
 }
@@ -80,7 +108,9 @@ const formatDateTime = (dateTime) => {
 }
 
 const isOverdue = (row) => {
-  if (!row.dueDate || row.status === 'RETURNED' || row.status === 'OVERDUE_RETURNED' || row.status === 'REJECTED') {
+  if (!row.dueDate || row.status === 'RETURNED' || row.status === 'OVERDUE_RETURNED' ||
+      row.status === 'REJECTED' || row.status === 'RENEW_PENDING' || row.status === 'RENEWED' ||
+      row.status === 'RENEW_REJECTED') {
     return false
   }
   return new Date(row.dueDate) < new Date()

@@ -10,7 +10,10 @@ public enum BorrowStatus {
     RETURNED("已归还"),
     OVERDUE("已逾期"),
     OVERDUE_RETURNED("已逾期但已归还"),
-    REJECTED("已拒绝");
+    REJECTED("已拒绝"),
+    RENEW_PENDING("待续借审核"),
+    RENEWED("已续借"),
+    RENEW_REJECTED("续借被拒绝");
     
     private final String description;
     
