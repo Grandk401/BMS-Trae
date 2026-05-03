@@ -3,6 +3,7 @@
  */
 package com.bms.mapper;
 
+import com.bms.dto.UserSearchDTO;
 import com.bms.entity.User;
 import org.apache.ibatis.annotations.*;
 
@@ -32,4 +33,12 @@ public interface UserMapper {
 
     @Delete("DELETE FROM user WHERE id = #{id}")
     int deleteById(Integer id);
+
+    /**
+     * 动态搜索用户列表
+     *
+     * @param dto 搜索条件
+     * @return 用户列表
+     */
+    List<User> searchUsers(UserSearchDTO dto);
 }

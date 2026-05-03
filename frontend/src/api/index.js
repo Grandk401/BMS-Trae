@@ -103,6 +103,7 @@ export const getOverdueRecords = () => api.get('/admin/borrow-records/overdue')
 
 // 用户管理API（系统管理员和图书管理员专用）
 export const getUsers = () => api.get(getFullPath('/users'))
+export const searchUsers = (params) => api.get(getFullPath('/users/search'), { params })
 export const getUserById = (id) => api.get(`/admin/users/${id}`)
 export const createUser = (data) => api.post('/admin/users', data)
 export const updateUserRole = (id, role) => api.put(getFullPath(`/users/${id}/role`), null, { params: { role } })

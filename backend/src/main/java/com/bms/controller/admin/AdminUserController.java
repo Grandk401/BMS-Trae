@@ -1,6 +1,7 @@
 package com.bms.controller.admin;
 
 import com.bms.common.Result;
+import com.bms.dto.UserSearchDTO;
 import com.bms.entity.User;
 import com.bms.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,21 @@ public class AdminUserController {
     @PreAuthorize("hasAuthority('user:read')")
     public Result<List<User>> getAllUsers() {
         return Result.success(userService.getAllUsers());
+    }
+
+    /**
+     * 动态搜索用户列表
+     * <p>
+     * 系统管理员可根据用户名、角色、状态等条件搜索用户。
+     * </p>
+     *
+     * @param dto 搜索条件
+     * @return 用户列表
+     */
+    @GetMapping("/search")
+    @PreAuthorize("hasAuthority('user:read')")
+    public Result<List<User>> searchUsers(UserSearchDTO dto) {
+        return Result.success(userService.searchUsers(dto));
     }
 
     /**

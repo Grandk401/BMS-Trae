@@ -13,6 +13,33 @@
           </el-button>
         </div>
       </template>
+
+      <!-- 搜索表单 -->
+      <el-form :model="searchForm" inline class="search-form" @keyup.enter="handleSearch">
+        <el-form-item label="用户ID">
+          <el-input v-model.number="searchForm.id" placeholder="用户ID" clearable style="width: 100px" />
+        </el-form-item>
+        <el-form-item label="用户名">
+          <el-input v-model="searchForm.username" placeholder="用户名" clearable style="width: 150px" />
+        </el-form-item>
+        <el-form-item label="角色">
+          <el-select v-model="searchForm.role" placeholder="角色" clearable style="width: 120px">
+            <el-option label="系统管理员" value="ADMIN" />
+            <el-option label="图书管理员" value="LIBRARIAN" />
+            <el-option label="读者" value="READER" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="searchForm.enabled" placeholder="状态" clearable style="width: 100px">
+            <el-option label="正常" :value="true" />
+            <el-option label="已禁用" :value="false" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
       
       <el-table :data="userList" border style="width: 100%">
         <el-table-column prop="id" label="用户ID" width="80" />
@@ -92,7 +119,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getUsers, createUser, updateUserRole, setUserEnabled, deleteUser } from '../api'
+import { getUsers, searchUsers, createUser, updateUserRole, setUserEnabled, deleteUser } from '../api'
 
 const userList = ref([])
 const showCreateDialog = ref(false)
@@ -102,6 +129,12 @@ const formData = ref({
   username: '',
   password: '',
   role: 'READER'
+})
+const searchForm = ref({
+  id: '',
+  username: '',
+  role: '',
+  enabled: ''
 })
 
 const handleCreateClick = () => {
@@ -140,11 +173,37 @@ const handleToggleEnabled = async (row) => {
 
 const loadUsers = async () => {
   try {
-    const response = await getUsers()
-    userList.value = response.data
+    const hasSearchParams = searchForm.value.id || searchForm.value.username || 
+                          searchForm.value.role || searchForm.value.enabled !== ''
+    if (hasSearchParams) {
+      const params = {}
+      if (searchForm.value.id) params.id = searchForm.value.id
+      if (searchForm.value.username) params.username = searchForm.value.username
+      if (searchForm.value.role) params.role = searchForm.value.role
+      if (searchForm.value.enabled !== '') params.enabled = searchForm.value.enabled
+      const response = await searchUsers(params)
+      userList.value = response.data
+    } else {
+      const response = await getUsers()
+      userList.value = response.data
+    }
   } catch (error) {
     ElMessage.error('获取用户列表失败: ' + error.message)
   }
+}
+
+const handleSearch = () => {
+  loadUsers()
+}
+
+const handleReset = () => {
+  searchForm.value = {
+    id: '',
+    username: '',
+    role: '',
+    enabled: ''
+  }
+  loadUsers()
 }
 
 const handleCreate = async () => {
@@ -189,5 +248,9 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.search-form {
+  margin-bottom: 20px;
 }
 </style>

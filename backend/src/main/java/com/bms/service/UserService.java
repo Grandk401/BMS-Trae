@@ -1,6 +1,7 @@
 package com.bms.service;
 
 import com.bms.common.Role;
+import com.bms.dto.UserSearchDTO;
 import com.bms.entity.User;
 import com.bms.exception.BusinessException;
 import com.bms.mapper.UserMapper;
@@ -132,6 +133,16 @@ public class UserService {
      */
     public List<User> getAllUsers() {
         return userMapper.findAll();
+    }
+
+    /**
+     * 动态搜索用户列表
+     *
+     * @param dto 搜索条件
+     * @return 用户列表
+     */
+    public List<User> searchUsers(UserSearchDTO dto) {
+        return userMapper.searchUsers(dto);
     }
 
     /**
