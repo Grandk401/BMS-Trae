@@ -4,6 +4,7 @@ import com.bms.common.Role;
 import com.bms.entity.User;
 import com.bms.exception.BusinessException;
 import com.bms.mapper.UserMapper;
+import com.bms.util.UserContext;
 import com.bms.utils.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,13 +147,14 @@ public class UserService {
     /**
      * 更新用户角色
      * <p>
-     * 系统管理员可修改用户的角色，有效值为ADMIN、LIBRARIAN、READER。
+     * 系统管理员可修改任意用户的角色。
+     * 图书管理员只能修改其他用户的角色为目标角色（LIBRARIAN或READER），不能将用户升级为系统管理员，也不能修改自己的角色。
      * 角色变更后，用户重新登录将获得新角色的权限。
      * </p>
      *
      * @param userId 用户ID
      * @param role   新角色
-     * @throws BusinessException 用户不存在或角色值无效时抛出
+     * @throws BusinessException 用户不存在、角色值无效、无权操作或试图修改自己角色时抛出
      */
     public void updateUserRole(Integer userId, String role) {
         User user = userMapper.findById(userId);
@@ -166,8 +168,23 @@ public class UserService {
             throw BusinessException.operationFailure("无效的角色: " + role);
         }
 
+        Integer currentUserId = UserContext.getUserId();
+        String currentUserRole = UserContext.getRole();
+
+        if (currentUserId != null && currentUserId.equals(userId)) {
+            log.warn("无权操作: 不能修改自己的角色, userId={}", userId);
+            throw BusinessException.operationFailure("不能修改自己的角色");
+        }
+
+        if (Role.LIBRARIAN.name().equals(currentUserRole)) {
+            if (Role.ADMIN.name().equals(role) || Role.ADMIN.name().equals(user.getRole())) {
+                log.warn("图书管理员无权将用户升级为系统管理员或修改系统管理员角色, userId={}, targetRole={}", userId, role);
+                throw BusinessException.operationFailure("图书管理员无权修改系统管理员的角色或将其升级为系统管理员");
+            }
+        }
+
         userMapper.updateRole(userId, role);
-        log.info("更新用户角色: userId={}, newRole={}", userId, role);
+        log.info("更新用户角色: userId={}, newRole={}, operatorUserId={}", userId, role, currentUserId);
     }
 
     /**

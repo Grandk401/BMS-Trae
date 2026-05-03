@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bms.mapper.BookMapper">
+
+    <resultMap id="BaseResultMap" type="com.bms.entity.Book">
+        <id column="id" property="id"/>
+        <result column="isbn" property="isbn"/>
+        <result column="title" property="title"/>
+        <result column="author" property="author"/>
+        <result column="publisher" property="publisher"/>
+        <result column="publish_date" property="publishDate"/>
+        <result column="category" property="category"/>
+        <result column="price" property="price"/>
+        <result column="stock" property="stock"/>
+        <result column="description" property="description"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="searchBooks" parameterType="com.bms.dto.BookSearchDTO" resultMap="BaseResultMap">
+        SELECT * FROM book
+        <where>
+            <if test="title != null and title != ''">
+                AND title LIKE CONCAT('%', #{title}, '%')
+            </if>
+            <if test="author != null and author != ''">
+                AND author LIKE CONCAT('%', #{author}, '%')
+            </if>
+            <if test="isbn != null and isbn != ''">
+                AND isbn LIKE CONCAT('%', #{isbn}, '%')
+            </if>
+            <if test="category != null and category != ''">
+                AND category LIKE CONCAT('%', #{category}, '%')
+            </if>
+            <if test="publisher != null and publisher != ''">
+                AND publisher LIKE CONCAT('%', #{publisher}, '%')
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

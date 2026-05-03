@@ -13,6 +13,7 @@ package com.bms.controller.librarian;
 
 import com.bms.common.Result;
 import com.bms.common.validation.ValidationGroup;
+import com.bms.dto.BookSearchDTO;
 import com.bms.entity.Book;
 import com.bms.service.BookService;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,20 @@ public class LibrarianBookController {
         log.info("图书管理员 - 查询所有图书列表");
         List<Book> books = bookService.getAllBooks();
         return Result.success("查询成功", books);
+    }
+
+    /**
+     * 模糊搜索图书（多条件组合）
+     *
+     * @param dto 搜索条件 DTO
+     * @return 符合条件的图书列表
+     */
+    @GetMapping("/search")
+    public Result<List<Book>> searchBooks(BookSearchDTO dto) {
+        log.info("图书管理员 - 模糊搜索图书: title={}, author={}, isbn={}, category={}, publisher={}",
+                dto.getTitle(), dto.getAuthor(), dto.getIsbn(), dto.getCategory(), dto.getPublisher());
+        List<Book> books = bookService.searchBooks(dto);
+        return Result.success("搜索成功", books);
     }
 
     /**

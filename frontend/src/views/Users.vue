@@ -17,18 +17,20 @@
       <el-table :data="userList" border style="width: 100%">
         <el-table-column prop="id" label="用户ID" width="80" />
         <el-table-column prop="username" label="用户名" />
-        <el-table-column label="角色" width="150">
+        <el-table-column label="角色" width="180">
           <template #default="scope">
-            <el-select 
-              v-model="scope.row.role" 
+            <el-select
+              v-if="scope.row.id !== currentUserId && (currentRole === 'ADMIN' || scope.row.role !== 'ADMIN')"
+              v-model="scope.row.role"
               @change="handleRoleChange(scope.row)"
               size="small"
-              :disabled="scope.row.username === 'admin'"
+              style="width: 120px"
             >
-              <el-option label="系统管理员" value="ADMIN" />
+              <el-option v-if="currentRole === 'ADMIN'" label="系统管理员" value="ADMIN" />
               <el-option label="图书管理员" value="LIBRARIAN" />
               <el-option label="读者" value="READER" />
             </el-select>
+            <span v-else>{{ getRoleLabel(scope.row.role) }}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="80">
@@ -58,7 +60,7 @@
         <div style="margin: 10px 0;">
           <label>角色:</label>
           <select v-model="formData.role" style="width: 100%; padding: 8px;">
-            <option value="ADMIN">系统管理员</option>
+            <option value="ADMIN" v-if="currentRole === 'ADMIN'">系统管理员</option>
             <option value="LIBRARIAN">图书管理员</option>
             <option value="READER">读者</option>
           </select>
@@ -79,6 +81,8 @@ import { getUsers, createUser, updateUserRole, deleteUser } from '../api'
 
 const userList = ref([])
 const showCreateDialog = ref(false)
+const currentUserId = ref(null)
+const currentRole = ref('')
 const formData = ref({
   username: '',
   password: '',
@@ -89,13 +93,21 @@ const handleCreateClick = () => {
   showCreateDialog.value = true
 }
 
+const getRoleLabel = (role) => {
+  const roleMap = {
+    'ADMIN': '系统管理员',
+    'LIBRARIAN': '图书管理员',
+    'READER': '读者'
+  }
+  return roleMap[role] || role
+}
+
 const handleRoleChange = async (row) => {
   try {
     await updateUserRole(row.id, row.role)
     ElMessage.success('角色修改成功')
   } catch (error) {
     ElMessage.error('角色修改失败: ' + error.message)
-    // 恢复原来的角色
     loadUsers()
   }
 }
@@ -136,6 +148,8 @@ const handleDelete = async (id) => {
 }
 
 onMounted(() => {
+  currentUserId.value = parseInt(localStorage.getItem('userId') || '0')
+  currentRole.value = localStorage.getItem('role') || ''
   loadUsers()
 })
 </script>

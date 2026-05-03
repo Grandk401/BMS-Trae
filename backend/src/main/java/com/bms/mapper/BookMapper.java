@@ -10,6 +10,7 @@
  */
 package com.bms.mapper;
 
+import com.bms.dto.BookSearchDTO;
 import com.bms.entity.Book;
 import org.apache.ibatis.annotations.*;
 
@@ -77,4 +78,12 @@ public interface BookMapper {
      */
     @Delete("DELETE FROM book WHERE id = #{id}")
     int deleteById(Integer id);
+
+    /**
+     * 模糊搜索图书（多条件动态组合）
+     *
+     * @param dto 搜索条件 DTO
+     * @return 符合条件的图书列表
+     */
+    List<Book> searchBooks(BookSearchDTO dto);
 }

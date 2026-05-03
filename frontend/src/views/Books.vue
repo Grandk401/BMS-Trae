@@ -8,6 +8,28 @@
         </div>
       </template>
 
+      <el-form :model="searchForm" inline class="search-form">
+        <el-form-item label="书名">
+          <el-input v-model="searchForm.title" placeholder="书名" clearable style="width: 120px" />
+        </el-form-item>
+        <el-form-item label="作者">
+          <el-input v-model="searchForm.author" placeholder="作者" clearable style="width: 120px" />
+        </el-form-item>
+        <el-form-item label="ISBN">
+          <el-input v-model="searchForm.isbn" placeholder="ISBN" clearable style="width: 120px" />
+        </el-form-item>
+        <el-form-item label="分类">
+          <el-input v-model="searchForm.category" placeholder="分类" clearable style="width: 120px" />
+        </el-form-item>
+        <el-form-item label="出版社">
+          <el-input v-model="searchForm.publisher" placeholder="出版社" clearable style="width: 120px" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+
       <el-table :data="books" style="width: 100%" v-loading="loading">
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="isbn" label="ISBN" width="120" />
@@ -64,7 +86,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getBooks, addBook, updateBook, deleteBook } from '@/api'
+import { getBooks, addBook, updateBook, deleteBook, searchBooks } from '@/api'
 import { hasPermission, PermissionCode } from '../utils/permission'
 
 const loading = ref(false)
@@ -72,6 +94,14 @@ const books = ref([])
 const dialogVisible = ref(false)
 const dialogTitle = ref('添加图书')
 const bookFormRef = ref(null)
+
+const searchForm = reactive({
+  title: '',
+  author: '',
+  isbn: '',
+  category: '',
+  publisher: ''
+})
 
 const bookForm = reactive({
   id: null,
@@ -98,15 +128,43 @@ const canDelete = computed(() => hasPermission(PermissionCode.BOOK_DELETE))
 const fetchBooks = async () => {
   loading.value = true
   try {
-    const res = await getBooks()
-    if (res.success) {
-      books.value = res.data || []
+    const hasSearchParams = searchForm.title || searchForm.author || searchForm.isbn ||
+                            searchForm.category || searchForm.publisher
+    if (hasSearchParams) {
+      const res = await searchBooks({
+        title: searchForm.title || undefined,
+        author: searchForm.author || undefined,
+        isbn: searchForm.isbn || undefined,
+        category: searchForm.category || undefined,
+        publisher: searchForm.publisher || undefined
+      })
+      if (res.success) {
+        books.value = res.data || []
+      }
+    } else {
+      const res = await getBooks()
+      if (res.success) {
+        books.value = res.data || []
+      }
     }
   } catch (error) {
     ElMessage.error('获取图书列表失败')
   } finally {
     loading.value = false
   }
+}
+
+const handleSearch = () => {
+  fetchBooks()
+}
+
+const handleReset = () => {
+  searchForm.title = ''
+  searchForm.author = ''
+  searchForm.isbn = ''
+  searchForm.category = ''
+  searchForm.publisher = ''
+  fetchBooks()
 }
 
 const handleAdd = () => {

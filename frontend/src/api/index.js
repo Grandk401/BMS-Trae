@@ -70,6 +70,7 @@ export const getBookById = (id) => api.get(getFullPath(`/books/${id}`))
 export const addBook = (data) => api.post(getFullPath('/books'), data)
 export const updateBook = (id, data) => api.put(getFullPath(`/books/${id}`), data)
 export const deleteBook = (id) => api.delete(getFullPath(`/books/${id}`))
+export const searchBooks = (params) => api.get(getFullPath('/books/search'), { params })
 
 // 借阅记录API（根据角色自动选择前缀）
 export const getBorrowRecords = () => api.get(getFullPath('/borrow-records'))
@@ -100,11 +101,11 @@ export const searchBorrowRecords = (params) => api.get('/admin/borrow-records/se
 // 查询逾期借阅记录
 export const getOverdueRecords = () => api.get('/admin/borrow-records/overdue')
 
-// 用户管理API（系统管理员专用）
-export const getUsers = () => api.get('/admin/users')
+// 用户管理API（系统管理员和图书管理员专用）
+export const getUsers = () => api.get(getFullPath('/users'))
 export const getUserById = (id) => api.get(`/admin/users/${id}`)
 export const createUser = (data) => api.post('/admin/users', data)
-export const updateUserRole = (id, role) => api.put(`/admin/users/${id}/role`, null, { params: { role } })
+export const updateUserRole = (id, role) => api.put(getFullPath(`/users/${id}/role`), null, { params: { role } })
 export const deleteUser = (id) => api.delete(`/admin/users/${id}`)
 
 export default api

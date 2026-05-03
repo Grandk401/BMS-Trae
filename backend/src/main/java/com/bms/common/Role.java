@@ -16,7 +16,8 @@ public enum Role {
     LIBRARIAN(Permission.USER_READ, Permission.USER_READ_OWN, Permission.USER_UPDATE_OWN,
               Permission.BOOK_CREATE, Permission.BOOK_READ, Permission.BOOK_UPDATE, Permission.BOOK_DELETE,
               Permission.BORROW_CREATE, Permission.BORROW_READ, Permission.BORROW_UPDATE,
-              Permission.BORROW_READ_OWN, Permission.BORROW_CREATE_OWN),
+              Permission.BORROW_READ_OWN, Permission.BORROW_CREATE_OWN,
+              Permission.ROLE_UPDATE),
 
     READER(Permission.USER_READ_OWN, Permission.USER_UPDATE_OWN,
            Permission.BOOK_READ,

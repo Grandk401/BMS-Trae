@@ -10,6 +10,7 @@
  */
 package com.bms.service;
 
+import com.bms.dto.BookSearchDTO;
 import com.bms.entity.Book;
 import com.bms.exception.BusinessException;
 import com.bms.mapper.BookMapper;
@@ -113,18 +114,35 @@ public class BookService {
      */
     public void deleteBook(Integer id) {
         log.info("删除图书: bookId={}", id);
-        
+
         Book existingBook = bookMapper.findById(id);
         if (existingBook == null) {
             log.warn("删除图书失败: 图书不存在, bookId={}", id);
             throw BusinessException.bookNotFound();
         }
-        
+
         int rows = bookMapper.deleteById(id);
         if (rows <= 0) {
             log.warn("删除图书失败: bookId={}", id);
             throw BusinessException.dbOperationFailure();
         }
         log.info("删除图书成功: bookId={}", id);
+    }
+
+    /**
+     * 模糊搜索图书
+     *
+     * 支持多条件组合搜索，所有条件都是可选的，满足的条件会进行模糊匹配
+     *
+     * @param dto 搜索条件 DTO
+     * @return 符合条件的图书列表
+     */
+    public List<Book> searchBooks(BookSearchDTO dto) {
+        log.info("模糊搜索图书: title={}, author={}, isbn={}, category={}, publisher={}",
+                dto.getTitle(), dto.getAuthor(), dto.getIsbn(), dto.getCategory(), dto.getPublisher());
+
+        List<Book> books = bookMapper.searchBooks(dto);
+        log.info("搜索到图书数量: {}", books.size());
+        return books;
     }
 }
