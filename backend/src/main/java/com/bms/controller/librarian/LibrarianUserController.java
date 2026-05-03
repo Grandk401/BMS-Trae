@@ -80,4 +80,22 @@ public class LibrarianUserController {
         userService.updateUserRole(id, role);
         return Result.success("角色更新成功", null);
     }
+
+    /**
+     * 启用或禁用用户
+     * <p>
+     * 图书管理员可启用或禁用普通读者账户，无权操作系统管理员账户。
+     * </p>
+     *
+     * @param id      用户ID
+     * @param enabled 是否启用
+     * @return 操作结果
+     */
+    @PutMapping("/{id}/enabled")
+    @PreAuthorize("hasAuthority('role:update')")
+    public Result<Void> setUserEnabled(@PathVariable Integer id, @RequestParam Boolean enabled) {
+        log.info("图书管理员 - {}用户: userId={}, enabled={}", enabled ? "启用" : "禁用", id, enabled);
+        userService.setUserEnabled(id, enabled);
+        return Result.success();
+    }
 }

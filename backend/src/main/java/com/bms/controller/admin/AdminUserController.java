@@ -90,6 +90,23 @@ public class AdminUserController {
     }
 
     /**
+     * 启用或禁用用户
+     * <p>
+     * 系统管理员可启用或禁用指定用户账户。
+     * </p>
+     *
+     * @param id      用户ID
+     * @param enabled 是否启用
+     * @return 操作结果
+     */
+    @PutMapping("/{id}/enabled")
+    @PreAuthorize("hasAuthority('role:update')")
+    public Result<Void> setUserEnabled(@PathVariable Integer id, @RequestParam Boolean enabled) {
+        userService.setUserEnabled(id, enabled);
+        return Result.success();
+    }
+
+    /**
      * 创建新用户
      * <p>
      * 系统管理员可创建新用户账号，密码会使用BCrypt加密后存储。

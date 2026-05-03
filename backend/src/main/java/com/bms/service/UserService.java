@@ -66,6 +66,11 @@ public class UserService {
             throw BusinessException.passwordWrong();
         }
 
+        if (user.getEnabled() == null || !user.getEnabled()) {
+            log.warn("用户登录失败: 账户已被禁用, username={}", username);
+            throw BusinessException.operationFailure("账户已被禁用，请联系管理员");
+        }
+
         Role role = Role.valueOf(user.getRole());
         String token = jwtUtils.generateToken(username, user.getId(), role, role.getPermissions());
         log.info("用户登录成功: username={}, userId={}, role={}", username, user.getId(), role);
@@ -200,6 +205,43 @@ public class UserService {
         }
         userMapper.deleteById(userId);
         log.info("删除用户: userId={}", userId);
+    }
+
+    /**
+     * 启用或禁用用户
+     * <p>
+     * 系统管理员可启用或禁用任意用户。
+     * 图书管理员只能启用或禁用普通读者。
+     * 管理员不能禁用或启用自己。
+     * </p>
+     *
+     * @param userId  用户ID
+     * @param enabled 是否启用
+     * @throws BusinessException 用户不存在、无权操作或试图操作自己时抛出
+     */
+    public void setUserEnabled(Integer userId, Boolean enabled) {
+        User user = userMapper.findById(userId);
+        if (user == null) {
+            throw BusinessException.userNotFound();
+        }
+
+        Integer currentUserId = UserContext.getUserId();
+        String currentUserRole = UserContext.getRole();
+
+        if (currentUserId != null && currentUserId.equals(userId)) {
+            log.warn("无权操作: 不能修改自己的账户状态, userId={}", userId);
+            throw BusinessException.operationFailure("不能修改自己的账户状态");
+        }
+
+        if (Role.LIBRARIAN.name().equals(currentUserRole)) {
+            if (Role.ADMIN.name().equals(user.getRole())) {
+                log.warn("图书管理员无权操作其他系统管理员的账户, userId={}", userId);
+                throw BusinessException.operationFailure("无权操作系统管理员的账户");
+            }
+        }
+
+        userMapper.updateEnabled(userId, enabled);
+        log.info("{}用户: userId={}, enabled={}, operatorUserId={}", enabled ? "启用" : "禁用", userId, enabled, currentUserId);
     }
 
     /**

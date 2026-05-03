@@ -27,6 +27,9 @@ public interface UserMapper {
     @Update("UPDATE user SET role = #{role} WHERE id = #{id}")
     int updateRole(Integer id, String role);
 
+    @Update("UPDATE user SET enabled = #{enabled} WHERE id = #{id}")
+    int updateEnabled(Integer id, Boolean enabled);
+
     @Delete("DELETE FROM user WHERE id = #{id}")
     int deleteById(Integer id);
 }

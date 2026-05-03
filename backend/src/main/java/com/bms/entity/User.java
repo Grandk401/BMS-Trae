@@ -9,6 +9,7 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
 import java.io.Serializable;
 
 /**
@@ -31,4 +32,6 @@ public class User implements Serializable {
     @Pattern(regexp = "^(ADMIN|LIBRARIAN|READER)$", message = "角色只能是 ADMIN、LIBRARIAN 或 READER",
              groups = {ValidationGroup.Add.class})
     private String role;
+
+    private Boolean enabled = true;
 }

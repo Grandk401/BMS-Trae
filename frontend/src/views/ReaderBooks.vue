@@ -7,6 +7,28 @@
         </div>
       </template>
 
+      <el-form :model="searchForm" inline class="search-form" @keyup.enter="handleSearch">
+        <el-form-item label="书名">
+          <el-input v-model="searchForm.title" placeholder="书名" clearable style="width: 120px" />
+        </el-form-item>
+        <el-form-item label="作者">
+          <el-input v-model="searchForm.author" placeholder="作者" clearable style="width: 120px" />
+        </el-form-item>
+        <el-form-item label="ISBN">
+          <el-input v-model="searchForm.isbn" placeholder="ISBN" clearable style="width: 120px" />
+        </el-form-item>
+        <el-form-item label="分类">
+          <el-input v-model="searchForm.category" placeholder="分类" clearable style="width: 120px" />
+        </el-form-item>
+        <el-form-item label="出版社">
+          <el-input v-model="searchForm.publisher" placeholder="出版社" clearable style="width: 120px" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+
       <el-table :data="books" style="width: 100%" v-loading="loading">
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="isbn" label="ISBN" width="120" />
@@ -41,23 +63,61 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getBooks, applyBorrow } from '@/api'
+import { getBooks, searchBooks, applyBorrow } from '@/api'
 
 const loading = ref(false)
 const books = ref([])
+const searchForm = ref({
+  title: '',
+  author: '',
+  isbn: '',
+  category: '',
+  publisher: ''
+})
 
 const fetchBooks = async () => {
   loading.value = true
   try {
-    const res = await getBooks()
-    if (res.success) {
-      books.value = res.data || []
+    const hasSearchParams = searchForm.value.title || searchForm.value.author ||
+                          searchForm.value.isbn || searchForm.value.category ||
+                          searchForm.value.publisher
+    if (hasSearchParams) {
+      const res = await searchBooks({
+        title: searchForm.value.title || undefined,
+        author: searchForm.value.author || undefined,
+        isbn: searchForm.value.isbn || undefined,
+        category: searchForm.value.category || undefined,
+        publisher: searchForm.value.publisher || undefined
+      })
+      if (res.success) {
+        books.value = res.data || []
+      }
+    } else {
+      const res = await getBooks()
+      if (res.success) {
+        books.value = res.data || []
+      }
     }
   } catch (error) {
     ElMessage.error('获取图书列表失败')
   } finally {
     loading.value = false
   }
+}
+
+const handleSearch = () => {
+  fetchBooks()
+}
+
+const handleReset = () => {
+  searchForm.value = {
+    title: '',
+    author: '',
+    isbn: '',
+    category: '',
+    publisher: ''
+  }
+  fetchBooks()
 }
 
 const handleBorrow = async (book) => {
@@ -89,5 +149,9 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.search-form {
+  margin-bottom: 20px;
 }
 </style>

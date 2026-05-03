@@ -106,6 +106,7 @@ export const getUsers = () => api.get(getFullPath('/users'))
 export const getUserById = (id) => api.get(`/admin/users/${id}`)
 export const createUser = (data) => api.post('/admin/users', data)
 export const updateUserRole = (id, role) => api.put(getFullPath(`/users/${id}/role`), null, { params: { role } })
+export const setUserEnabled = (id, enabled) => api.put(getFullPath(`/users/${id}/enabled`), null, { params: { enabled } })
 export const deleteUser = (id) => api.delete(`/admin/users/${id}`)
 
 export default api

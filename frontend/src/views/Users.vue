@@ -33,12 +33,27 @@
             <span v-else>{{ getRoleLabel(scope.row.role) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="80">
+        <el-table-column label="状态" width="100">
           <template #default="scope">
-            <el-button 
-              size="small" 
+            <el-tag :type="scope.row.enabled ? 'success' : 'danger'" size="small">
+              {{ scope.row.enabled ? '正常' : '已禁用' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="150">
+          <template #default="scope">
+            <el-button
+              v-if="scope.row.id !== currentUserId && (currentRole === 'ADMIN' || scope.row.role !== 'ADMIN')"
+              size="small"
+              :type="scope.row.enabled ? 'warning' : 'success'"
+              @click="handleToggleEnabled(scope.row)"
+            >
+              {{ scope.row.enabled ? '禁用' : '启用' }}
+            </el-button>
+            <el-button
+              size="small"
+              type="danger"
               @click="handleDelete(scope.row.id)"
-              :disabled="scope.row.username === 'admin'"
             >删除</el-button>
           </template>
         </el-table-column>
@@ -77,7 +92,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getUsers, createUser, updateUserRole, deleteUser } from '../api'
+import { getUsers, createUser, updateUserRole, setUserEnabled, deleteUser } from '../api'
 
 const userList = ref([])
 const showCreateDialog = ref(false)
@@ -109,6 +124,17 @@ const handleRoleChange = async (row) => {
   } catch (error) {
     ElMessage.error('角色修改失败: ' + error.message)
     loadUsers()
+  }
+}
+
+const handleToggleEnabled = async (row) => {
+  const action = row.enabled ? '禁用' : '启用'
+  try {
+    await setUserEnabled(row.id, !row.enabled)
+    ElMessage.success(`${action}成功`)
+    loadUsers()
+  } catch (error) {
+    ElMessage.error(`${action}失败: ` + error.message)
   }
 }
 

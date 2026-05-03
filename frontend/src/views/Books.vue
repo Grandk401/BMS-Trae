@@ -8,7 +8,7 @@
         </div>
       </template>
 
-      <el-form :model="searchForm" inline class="search-form">
+      <el-form :model="searchForm" inline class="search-form" @keyup.enter="handleSearch">
         <el-form-item label="书名">
           <el-input v-model="searchForm.title" placeholder="书名" clearable style="width: 120px" />
         </el-form-item>
