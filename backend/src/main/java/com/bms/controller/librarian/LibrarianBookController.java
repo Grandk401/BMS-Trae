@@ -114,4 +114,16 @@ public class LibrarianBookController {
         bookService.deleteBook(id);
         return Result.success("删除成功", null);
     }
+
+    /**
+     * 获取所有图书分类
+     *
+     * @return 分类列表
+     */
+    @GetMapping("/categories")
+    public Result<List<String>> getAllCategories() {
+        log.info("图书管理员 - 查询所有图书分类");
+        List<String> categories = bookService.getAllCategories();
+        return Result.success("查询成功", categories);
+    }
 }

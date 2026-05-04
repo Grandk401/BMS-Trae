@@ -10,6 +10,8 @@ import ReaderRecords from '../views/ReaderRecords.vue'
 import ReaderHome from '../views/ReaderHome.vue'
 import HomeOrReaderHome from '../views/HomeOrReaderHome.vue'
 import AnnouncementManager from '../views/AnnouncementManager.vue'
+import OperationLogs from '../views/OperationLogs.vue'
+import Statistics from '../views/Statistics.vue'
 import { canAccessRoute } from '../utils/permission'
 
 const routes = [
@@ -58,14 +60,24 @@ const routes = [
         component: Settings,
         meta: { permission: 'system:config' }
       },
-      // 公告管理
       {
         path: 'announcements',
         name: 'Announcements',
         component: AnnouncementManager,
         meta: { permission: 'system:config' }
       },
-      // 读者专属路由
+      {
+        path: 'operation-logs',
+        name: 'OperationLogs',
+        component: OperationLogs,
+        meta: { permission: 'system:config' }
+      },
+      {
+        path: 'statistics',
+        name: 'Statistics',
+        component: Statistics,
+        meta: { permission: 'borrow:read' }
+      },
       {
         path: 'reader-books',
         name: 'ReaderBooks',
@@ -89,27 +101,24 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
-  
-  // 未登录用户只能访问登录页
+
   if (!token && to.meta.requiresAuth) {
     next('/login')
     return
   }
-  
-  // 已登录用户访问登录页自动跳转到首页
+
   if (token && to.path === '/login') {
     next('/dashboard')
     return
   }
-  
-  // 检查路由权限
+
   if (to.meta.requiresAuth && to.meta.permission) {
     if (!canAccessRoute(to.path, to.meta.permission)) {
       next('/dashboard')
       return
     }
   }
-  
+
   next()
 })
 

@@ -11,6 +11,7 @@
  */
 package com.bms.controller.librarian;
 
+import com.bms.annotation.OperationLogging;
 import com.bms.common.Result;
 import com.bms.common.validation.ValidationGroup;
 import com.bms.entity.BorrowRecord;
@@ -66,6 +67,7 @@ public class LibrarianBorrowRecordController {
      * @return 添加后的借阅记录
      */
     @PostMapping
+    @OperationLogging(module = "BORROW_RECORD", type = "ADD", description = "添加借阅记录")
     public Result<BorrowRecord> addRecord(@Validated(ValidationGroup.Add.class) @RequestBody BorrowRecord record) {
         log.info("图书管理员 - 添加借阅记录: bookId={}, userId={}", record.getBookId(), record.getUserId());
         BorrowRecord savedRecord = borrowRecordService.addRecord(record);
@@ -80,6 +82,7 @@ public class LibrarianBorrowRecordController {
      * @return 更新后的借阅记录
      */
     @PutMapping("/{id}")
+    @OperationLogging(module = "BORROW_RECORD", type = "UPDATE", description = "更新借阅记录")
     public Result<BorrowRecord> updateRecord(@PathVariable Integer id, @Validated(ValidationGroup.Update.class) @RequestBody BorrowRecord record) {
         log.info("图书管理员 - 更新借阅记录: recordId={}", id);
         record.setId(id);
@@ -94,6 +97,7 @@ public class LibrarianBorrowRecordController {
      * @return 删除结果
      */
     @DeleteMapping("/{id}")
+    @OperationLogging(module = "BORROW_RECORD", type = "DELETE", description = "删除借阅记录")
     public Result<String> deleteRecord(@PathVariable Integer id) {
         log.info("图书管理员 - 删除借阅记录: recordId={}", id);
         borrowRecordService.deleteRecord(id);

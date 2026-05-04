@@ -15,6 +15,7 @@ import com.bms.entity.Book;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 图书数据访问接口
@@ -86,4 +87,56 @@ public interface BookMapper {
      * @return 符合条件的图书列表
      */
     List<Book> searchBooks(BookSearchDTO dto);
+
+    /**
+     * 根据ID列表查询图书
+     *
+     * @param ids 图书ID列表
+     * @return 图书列表
+     */
+    @Select("<script>" +
+            "SELECT * FROM book WHERE id IN " +
+            "<foreach item='id' collection='ids' open='(' separator=',' close=')'>#{id}</foreach>" +
+            "</script>")
+    List<Book> findByIds(List<Integer> ids);
+
+    /**
+     * 获取所有图书分类
+     *
+     * @return 分类列表
+     */
+    @Select("SELECT DISTINCT category FROM book WHERE category IS NOT NULL AND category != '' ORDER BY category")
+    List<String> findAllCategories();
+
+    /**
+     * 统计图书总数
+     *
+     * @return 图书总数
+     */
+    @Select("SELECT COUNT(*) FROM book")
+    int countTotalBooks();
+
+    /**
+     * 统计已借出图书数量
+     *
+     * @return 已借出数量
+     */
+    @Select("SELECT COUNT(*) FROM book WHERE stock > 0")
+    int countBorrowedBooks();
+
+    /**
+     * 统计可用图书数量
+     *
+     * @return 可用数量
+     */
+    @Select("SELECT COALESCE(SUM(stock), 0) FROM book WHERE stock > 0")
+    int countAvailableBooks();
+
+    /**
+     * 获取各类别图书分布
+     *
+     * @return 类别统计数据
+     */
+    @Select("SELECT category AS name, COUNT(*) AS value FROM book WHERE category IS NOT NULL AND category != '' GROUP BY category")
+    List<Map<String, Object>> getCategoryDistribution();
 }

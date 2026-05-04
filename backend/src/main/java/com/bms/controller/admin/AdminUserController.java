@@ -1,5 +1,6 @@
 package com.bms.controller.admin;
 
+import com.bms.annotation.OperationLogging;
 import com.bms.common.Result;
 import com.bms.dto.UserSearchDTO;
 import com.bms.entity.User;
@@ -84,6 +85,7 @@ public class AdminUserController {
      */
     @PutMapping("/{id}/role")
     @PreAuthorize("hasAuthority('role:update')")
+    @OperationLogging(module = "USER", type = "UPDATE", description = "更新用户角色")
     public Result<Void> updateUserRole(@PathVariable Integer id, @RequestParam String role) {
         userService.updateUserRole(id, role);
         return Result.success();
@@ -100,6 +102,7 @@ public class AdminUserController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('user:delete')")
+    @OperationLogging(module = "USER", type = "DELETE", description = "删除用户")
     public Result<Void> deleteUser(@PathVariable Integer id) {
         userService.deleteUser(id);
         return Result.success();
@@ -135,6 +138,7 @@ public class AdminUserController {
      */
     @PostMapping
     @PreAuthorize("hasAuthority('user:create')")
+    @OperationLogging(module = "USER", type = "ADD", description = "创建用户")
     public Result<User> createUser(@RequestBody User user) {
         User createdUser = userService.createUser(user.getUsername(), user.getPassword(), 
                 user.getRole() != null ? user.getRole() : "READER");

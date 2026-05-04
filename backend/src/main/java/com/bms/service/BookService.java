@@ -145,4 +145,16 @@ public class BookService {
         log.info("搜索到图书数量: {}", books.size());
         return books;
     }
+
+    /**
+     * 获取所有图书分类
+     *
+     * @return 分类列表
+     */
+    public List<String> getAllCategories() {
+        log.info("查询所有图书分类");
+        List<String> categories = bookMapper.findAllCategories();
+        log.info("查询到分类数量: {}", categories.size());
+        return categories;
+    }
 }

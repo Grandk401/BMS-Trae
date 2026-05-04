@@ -2,23 +2,25 @@
   <router-view />
 </template>
 
-<script>
-export default {
-  name: 'App',
-  mounted() {
-    document.addEventListener('keyup', this.handleEscKey)
-  },
-  beforeUnmount() {
-    document.removeEventListener('keyup', this.handleEscKey)
-  },
-  methods: {
-    handleEscKey(event) {
-      if (event.key === 'Escape') {
-        this.$router.push('/dashboard')
-      }
-    }
+<script setup>
+import { onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const handleEscKey = (event) => {
+  if (event.key === 'Escape') {
+    router.push('/dashboard')
   }
 }
+
+onMounted(() => {
+  document.addEventListener('keyup', handleEscKey)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keyup', handleEscKey)
+})
 </script>
 
 <style>

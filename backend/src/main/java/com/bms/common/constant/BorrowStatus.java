@@ -16,6 +16,11 @@ package com.bms.common.constant;
 public enum BorrowStatus {
 
     /**
+     * 待审核
+     */
+    PENDING("待审核"),
+
+    /**
      * 借阅中
      */
     BORROWING("借阅中"),
@@ -23,7 +28,22 @@ public enum BorrowStatus {
     /**
      * 已归还
      */
-    RETURNED("已归还");
+    RETURNED("已归还"),
+
+    /**
+     * 已逾期
+     */
+    OVERDUE("已逾期"),
+
+    /**
+     * 已逾期但已归还
+     */
+    OVERDUE_RETURNED("已逾期但已归还"),
+
+    /**
+     * 已拒绝
+     */
+    REJECTED("已拒绝");
 
     /**
      * 状态描述

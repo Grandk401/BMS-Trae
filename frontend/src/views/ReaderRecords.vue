@@ -50,12 +50,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getBorrowRecords, applyRenew } from '@/api'
 
 const loading = ref(false)
 const records = ref([])
+let isMounted = ref(false)
 
 const handleRenew = async (row) => {
   try {
@@ -117,21 +118,31 @@ const isOverdue = (row) => {
 }
 
 const fetchRecords = async () => {
+  if (!isMounted.value) return
   loading.value = true
   try {
     const res = await getBorrowRecords()
-    if (res.success) {
+    if (res.success && isMounted.value) {
       records.value = res.data || []
     }
   } catch (error) {
-    ElMessage.error('获取借阅记录失败')
+    if (isMounted.value) {
+      ElMessage.error('获取借阅记录失败')
+    }
   } finally {
-    loading.value = false
+    if (isMounted.value) {
+      loading.value = false
+    }
   }
 }
 
 onMounted(() => {
+  isMounted.value = true
   fetchRecords()
+})
+
+onUnmounted(() => {
+  isMounted.value = false
 })
 </script>
 

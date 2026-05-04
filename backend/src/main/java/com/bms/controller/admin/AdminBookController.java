@@ -11,6 +11,7 @@
  */
 package com.bms.controller.admin;
 
+import com.bms.annotation.OperationLogging;
 import com.bms.common.Result;
 import com.bms.common.validation.ValidationGroup;
 import com.bms.dto.BookSearchDTO;
@@ -81,6 +82,7 @@ public class AdminBookController {
      * @return 添加后的图书
      */
     @PostMapping
+    @OperationLogging(module = "BOOK", type = "ADD", description = "添加图书")
     public Result<Book> addBook(@Validated(ValidationGroup.Add.class) @RequestBody Book book) {
         log.info("系统管理员 - 添加图书: title={}", book.getTitle());
         Book savedBook = bookService.addBook(book);
@@ -95,6 +97,7 @@ public class AdminBookController {
      * @return 更新后的图书
      */
     @PutMapping("/{id}")
+    @OperationLogging(module = "BOOK", type = "UPDATE", description = "更新图书")
     public Result<Book> updateBook(@PathVariable Integer id, @Validated(ValidationGroup.Update.class) @RequestBody Book book) {
         log.info("系统管理员 - 更新图书: bookId={}", id);
         book.setId(id);
@@ -109,9 +112,22 @@ public class AdminBookController {
      * @return 删除结果
      */
     @DeleteMapping("/{id}")
+    @OperationLogging(module = "BOOK", type = "DELETE", description = "删除图书")
     public Result<String> deleteBook(@PathVariable Integer id) {
         log.info("系统管理员 - 删除图书: bookId={}", id);
         bookService.deleteBook(id);
         return Result.success("删除成功", null);
+    }
+
+    /**
+     * 获取所有图书分类
+     *
+     * @return 分类列表
+     */
+    @GetMapping("/categories")
+    public Result<List<String>> getAllCategories() {
+        log.info("系统管理员 - 查询所有图书分类");
+        List<String> categories = bookService.getAllCategories();
+        return Result.success("查询成功", categories);
     }
 }

@@ -13,8 +13,10 @@ package com.bms.mapper;
 import com.bms.entity.BorrowRecord;
 import org.apache.ibatis.annotations.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 借阅记录数据访问接口
@@ -75,7 +77,8 @@ public interface BorrowRecordMapper {
      */
     @Update("UPDATE borrow_record SET book_id=#{bookId}, user_id=#{userId}, " +
             "borrow_date=#{borrowDate}, due_date=#{dueDate}, return_date=#{returnDate}, " +
-            "status=#{status}, remark=#{remark}, operator_id=#{operatorId}, renewal_count=#{renewalCount} WHERE id=#{id}")
+            "status=#{status}, remark=#{remark}, operator_id=#{operatorId}, renewal_count=#{renewalCount}, " +
+            "overdue_days=#{overdueDays}, fine=#{fine} WHERE id=#{id}")
     int update(BorrowRecord record);
 
     /**
@@ -150,6 +153,39 @@ public interface BorrowRecordMapper {
     List<BorrowRecord> findOverdueRecords(LocalDateTime now);
 
     /**
+     * 批量更新借阅记录状态为逾期
+     *
+     * @param status   新状态
+     * @param dueDateEnd 应归还日期截止时间（小于此时间的记录将被更新）
+     * @return 影响的行数
+     */
+    @Update("UPDATE borrow_record SET status = #{status} WHERE status = 'BORROWING' AND due_date < #{dueDateEnd}")
+    int batchUpdateOverdueStatus(@Param("status") String status, @Param("dueDateEnd") LocalDateTime dueDateEnd);
+
+    /**
+     * 查询所有已逾期但未归还的借阅记录（OVERDUE 状态）
+     *
+     * @return 借阅记录列表
+     */
+    @Select("SELECT br.*, u.username, b.title as book_name, b.isbn " +
+            "FROM borrow_record br " +
+            "LEFT JOIN user u ON br.user_id = u.id " +
+            "LEFT JOIN book b ON br.book_id = b.id " +
+            "WHERE br.status = 'OVERDUE' ORDER BY br.due_date ASC")
+    List<BorrowRecord> findAllOverdueNotReturned();
+
+    /**
+     * 批量更新逾期罚款信息
+     *
+     * @param overdueDays 逾期天数
+     * @param fine        罚款金额
+     * @param id          记录ID
+     * @return 影响的行数
+     */
+    @Update("UPDATE borrow_record SET overdue_days = #{overdueDays}, fine = #{fine} WHERE id = #{id}")
+    int updateOverdueFine(@Param("overdueDays") Integer overdueDays, @Param("fine") BigDecimal fine, @Param("id") Integer id);
+
+    /**
      * 根据 ID 删除借阅记录
      *
      * @param id 借阅记录 ID
@@ -157,4 +193,67 @@ public interface BorrowRecordMapper {
      */
     @Delete("DELETE FROM borrow_record WHERE id = #{id}")
     int deleteById(Integer id);
+
+    /**
+     * 统计所有借阅记录数量
+     *
+     * @return 借阅记录总数
+     */
+    @Select("SELECT COUNT(*) FROM borrow_record")
+    int countAllRecords();
+
+    /**
+     * 获取近N天借阅趋势
+     *
+     * @param days 天数
+     * @return 每日借阅统计数据
+     */
+    @Select("SELECT DATE(borrow_date) AS date, COUNT(*) AS count " +
+            "FROM borrow_record " +
+            "WHERE borrow_date >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY) " +
+            "GROUP BY DATE(borrow_date) " +
+            "ORDER BY date")
+    List<Map<String, Object>> getBorrowTrend(int days);
+
+    /**
+     * 获取借阅次数最多的图书
+     *
+     * @param limit 返回数量
+     * @return 图书借阅统计
+     */
+    @Select("SELECT b.title AS title, COUNT(br.id) AS borrowCount " +
+            "FROM borrow_record br " +
+            "LEFT JOIN book b ON br.book_id = b.id " +
+            "GROUP BY br.book_id, b.title " +
+            "ORDER BY borrowCount DESC " +
+            "LIMIT #{limit}")
+    List<Map<String, Object>> getTopBorrowedBooks(int limit);
+
+    /**
+     * 获取每月借阅统计（包括借阅和归还）
+     *
+     * @return 每月借阅统计数据
+     */
+    @Select("SELECT " +
+            "m.month, " +
+            "COALESCE(b.borrow_count, 0) AS borrowCount, " +
+            "COALESCE(r.return_count, 0) AS returnCount " +
+            "FROM (" +
+            "    SELECT DISTINCT DATE_FORMAT(borrow_date, '%Y-%m') AS month FROM borrow_record " +
+            "    UNION " +
+            "    SELECT DISTINCT DATE_FORMAT(return_date, '%Y-%m') AS month FROM borrow_record WHERE return_date IS NOT NULL " +
+            ") m " +
+            "LEFT JOIN (" +
+            "    SELECT DATE_FORMAT(borrow_date, '%Y-%m') AS month, COUNT(*) AS borrow_count " +
+            "    FROM borrow_record " +
+            "    GROUP BY DATE_FORMAT(borrow_date, '%Y-%m')" +
+            ") b ON m.month = b.month " +
+            "LEFT JOIN (" +
+            "    SELECT DATE_FORMAT(return_date, '%Y-%m') AS month, COUNT(*) AS return_count " +
+            "    FROM borrow_record WHERE return_date IS NOT NULL " +
+            "    GROUP BY DATE_FORMAT(return_date, '%Y-%m')" +
+            ") r ON m.month = r.month " +
+            "ORDER BY m.month DESC " +
+            "LIMIT 12")
+    List<Map<String, Object>> getMonthlyStatistics();
 }

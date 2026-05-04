@@ -62,6 +62,7 @@ public class SecurityConfig {
                 .antMatchers("/reader/books").permitAll()
                 .antMatchers("/reader/borrow-records/**").permitAll()
                 .antMatchers("/announcements").permitAll()
+                .antMatchers("/api/statistics/**").authenticated()
                 .anyRequest().authenticated()
             .and()
             .exceptionHandling();

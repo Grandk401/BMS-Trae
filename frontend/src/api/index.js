@@ -71,6 +71,7 @@ export const addBook = (data) => api.post(getFullPath('/books'), data)
 export const updateBook = (id, data) => api.put(getFullPath(`/books/${id}`), data)
 export const deleteBook = (id) => api.delete(getFullPath(`/books/${id}`))
 export const searchBooks = (params) => api.get(getFullPath('/books/search'), { params })
+export const getCategories = () => api.get(getFullPath('/books/categories'))
 
 // 借阅记录API（根据角色自动选择前缀）
 export const getBorrowRecords = () => api.get(getFullPath('/borrow-records'))
@@ -109,5 +110,9 @@ export const createUser = (data) => api.post('/admin/users', data)
 export const updateUserRole = (id, role) => api.put(getFullPath(`/users/${id}/role`), null, { params: { role } })
 export const setUserEnabled = (id, enabled) => api.put(getFullPath(`/users/${id}/enabled`), null, { params: { enabled } })
 export const deleteUser = (id) => api.delete(`/admin/users/${id}`)
+
+// 操作日志API
+export const getOperationLogs = (params) => api.get('/admin/operation-logs', { params })
+export const getOperationLogById = (id) => api.get(`/admin/operation-logs/${id}`)
 
 export default api

@@ -12,6 +12,7 @@ package com.bms.dto;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -36,9 +37,29 @@ public class BorrowRecordWithBookDTO {
     private String bookTitle;
 
     /**
+     * 图书名称（兼容字段）
+     */
+    private String bookName;
+
+    /**
      * 图书 ISBN
      */
     private String bookIsbn;
+
+    /**
+     * 图书 ISBN（兼容字段）
+     */
+    private String isbn;
+
+    /**
+     * 图书作者
+     */
+    private String author;
+
+    /**
+     * 图书分类
+     */
+    private String category;
 
     /**
      * 用户 ID
@@ -74,4 +95,24 @@ public class BorrowRecordWithBookDTO {
      * 备注
      */
     private String remark;
+
+    /**
+     * 操作员ID
+     */
+    private Integer operatorId;
+
+    /**
+     * 续借次数
+     */
+    private Integer renewalCount;
+
+    /**
+     * 逾期天数
+     */
+    private Integer overdueDays;
+
+    /**
+     * 罚款金额（元）
+     */
+    private BigDecimal fine;
 }

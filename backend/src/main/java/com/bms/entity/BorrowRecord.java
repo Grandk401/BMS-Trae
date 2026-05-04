@@ -16,9 +16,9 @@ import lombok.Data;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -82,6 +82,16 @@ public class BorrowRecord implements Serializable {
      * 续借次数
      */
     private Integer renewalCount;
+
+    /**
+     * 逾期天数（从被标记为逾期当天开始计算）
+     */
+    private Integer overdueDays;
+
+    /**
+     * 罚款金额（元，每天0.2元，封顶10元）
+     */
+    private BigDecimal fine;
 
     /**
      * 用户名（用于关联查询）

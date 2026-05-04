@@ -71,4 +71,16 @@ public class ReaderBookController {
         List<Book> books = bookService.searchBooks(dto);
         return Result.success("搜索成功", books);
     }
+
+    /**
+     * 获取所有图书分类
+     *
+     * @return 分类列表
+     */
+    @GetMapping("/categories")
+    public Result<List<String>> getAllCategories() {
+        log.info("普通读者 - 查询所有图书分类");
+        List<String> categories = bookService.getAllCategories();
+        return Result.success("查询成功", categories);
+    }
 }

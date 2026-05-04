@@ -45,7 +45,7 @@
         </el-table-column>
         <el-table-column prop="dueDate" label="应还日期" width="160">
           <template #default="scope">
-            <span :class="{ 'overdue-text': isOverdue(scope.row) }">
+            <span :class="{ 'overdue-text': scope.row.status === 'OVERDUE' || scope.row.status === 'OVERDUE_RETURNED' }">
               {{ formatDateTime(scope.row.dueDate) }}
             </span>
           </template>
@@ -70,8 +70,6 @@
                        v-if="scope.row.status === 'PENDING'">拒绝</el-button>
             <el-button size="small" type="primary" @click="handleConfirmReturn(scope.row)"
                        v-if="scope.row.status === 'BORROWING' || scope.row.status === 'OVERDUE'">已归还</el-button>
-            <el-button size="small" type="warning" @click="handleMarkOverdue(scope.row)"
-                       v-if="scope.row.status === 'BORROWING' && isOverdue(scope.row)">已逾期未归还</el-button>
             <el-button size="small" type="success" @click="handleApproveRenew(scope.row)"
                        v-if="scope.row.status === 'RENEW_PENDING'">同意续借</el-button>
             <el-button size="small" type="danger" @click="handleRejectRenew(scope.row)"
@@ -84,12 +82,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getBorrowRecords, approveBorrow, rejectBorrow, confirmReturn, markOverdue, searchBorrowRecords, approveRenew, rejectRenew } from '@/api'
+import { getBorrowRecords, approveBorrow, rejectBorrow, confirmReturn, searchBorrowRecords, approveRenew, rejectRenew } from '@/api'
 
 const loading = ref(false)
 const records = ref([])
+let isMounted = ref(false)
 
 const searchForm = reactive({
   bookName: '',
@@ -101,6 +100,7 @@ const searchForm = reactive({
 })
 
 const fetchRecords = async (isSearch = false) => {
+  if (!isMounted.value) return
   loading.value = true
   try {
     let res
@@ -117,13 +117,17 @@ const fetchRecords = async (isSearch = false) => {
     } else {
       res = await getBorrowRecords()
     }
-    if (res.success) {
+    if (res.success && isMounted.value) {
       records.value = res.data || []
     }
   } catch (error) {
-    ElMessage.error('获取借阅记录失败')
+    if (isMounted.value) {
+      ElMessage.error('获取借阅记录失败')
+    }
   } finally {
-    loading.value = false
+    if (isMounted.value) {
+      loading.value = false
+    }
   }
 }
 
@@ -172,20 +176,6 @@ const handleReject = async (row) => {
 const handleConfirmReturn = async (row) => {
   try {
     const res = await confirmReturn(row.id)
-    if (res.success) {
-      ElMessage.success(res.message)
-      fetchRecords()
-    } else {
-      ElMessage.error(res.message)
-    }
-  } catch (error) {
-    ElMessage.error('操作失败')
-  }
-}
-
-const handleMarkOverdue = async (row) => {
-  try {
-    const res = await markOverdue(row.id)
     if (res.success) {
       ElMessage.success(res.message)
       fetchRecords()
@@ -261,17 +251,13 @@ const getStatusType = (status) => {
   return typeMap[status] || 'default'
 }
 
-const isOverdue = (row) => {
-  if (!row.dueDate || row.status === 'RETURNED' || row.status === 'OVERDUE_RETURNED' ||
-      row.status === 'REJECTED' || row.status === 'RENEW_PENDING' || row.status === 'RENEWED' ||
-      row.status === 'RENEW_REJECTED') {
-    return false
-  }
-  return new Date(row.dueDate) < new Date()
-}
-
 onMounted(() => {
+  isMounted.value = true
   fetchRecords()
+})
+
+onUnmounted(() => {
+  isMounted.value = false
 })
 </script>
 

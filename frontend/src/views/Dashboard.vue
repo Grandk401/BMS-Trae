@@ -14,6 +14,9 @@
           <el-menu-item index="/dashboard">
             <span>首页</span>
           </el-menu-item>
+          <el-menu-item index="/dashboard/statistics" v-if="showStatisticsMenu">
+            <span>数据统计</span>
+          </el-menu-item>
           <el-menu-item index="/dashboard/books" v-if="showBooksMenu && !showReaderBooksMenu">
             <span>在馆图书</span>
           </el-menu-item>
@@ -34,6 +37,9 @@
           </el-menu-item>
           <el-menu-item index="/dashboard/announcements" v-if="showSettingsMenu">
             <span>公告管理</span>
+          </el-menu-item>
+          <el-menu-item index="/dashboard/operation-logs" v-if="showSettingsMenu">
+            <span>操作日志</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -83,10 +89,9 @@ const showBooksMenu = computed(() => hasPermission(PermissionCode.BOOK_READ))
 const showBorrowRecordsMenu = computed(() => hasPermission(PermissionCode.BORROW_READ))
 const showUsersMenu = computed(() => hasPermission(PermissionCode.USER_READ))
 const showSettingsMenu = computed(() => hasPermission(PermissionCode.SYSTEM_CONFIG))
-// 读者角色的在馆图书页面
 const showReaderBooksMenu = computed(() => hasPermission(PermissionCode.BORROW_READ_OWN) && !hasPermission(PermissionCode.BORROW_READ))
-// 读者角色的我的借阅页面
 const showReaderBorrowMenu = computed(() => hasPermission(PermissionCode.BORROW_READ_OWN))
+const showStatisticsMenu = computed(() => hasPermission(PermissionCode.BORROW_READ))
 
 onMounted(() => {
   username.value = localStorage.getItem('username') || 'User'

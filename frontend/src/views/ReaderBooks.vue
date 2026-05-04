@@ -18,7 +18,27 @@
           <el-input v-model="searchForm.isbn" placeholder="ISBN" clearable style="width: 120px" />
         </el-form-item>
         <el-form-item label="分类">
-          <el-input v-model="searchForm.category" placeholder="分类" clearable style="width: 120px" />
+          <el-select 
+            v-model="searchForm.category" 
+            placeholder="请选择分类" 
+            style="width: 150px"
+            :popper-append-to-body="false"
+            :loading="categoriesLoading"
+            @visible-change="handleCategoryDropdownVisible"
+            @change="handleSearch"
+          >
+            <el-option 
+              key="all" 
+              label="全部" 
+              value="" 
+            />
+            <el-option 
+              v-for="category in categories" 
+              :key="category" 
+              :label="category" 
+              :value="category" 
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="出版社">
           <el-input v-model="searchForm.publisher" placeholder="出版社" clearable style="width: 120px" />
@@ -63,10 +83,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getBooks, searchBooks, applyBorrow } from '@/api'
+import { getBooks, searchBooks, applyBorrow, getCategories } from '@/api'
 
 const loading = ref(false)
 const books = ref([])
+const categories = ref([])
+const categoriesLoading = ref(false)
 const searchForm = ref({
   title: '',
   author: '',
@@ -118,6 +140,26 @@ const handleReset = () => {
     publisher: ''
   }
   fetchBooks()
+}
+
+const fetchCategories = async () => {
+  categoriesLoading.value = true
+  try {
+    const res = await getCategories()
+    if (res.success) {
+      categories.value = res.data || []
+    }
+  } catch (error) {
+    ElMessage.error('获取分类列表失败')
+  } finally {
+    categoriesLoading.value = false
+  }
+}
+
+const handleCategoryDropdownVisible = async (visible) => {
+  if (visible && categories.value.length === 0) {
+    await fetchCategories()
+  }
 }
 
 const handleBorrow = async (book) => {
