@@ -16,12 +16,11 @@ import com.bms.common.Result;
 import com.bms.common.validation.ValidationGroup;
 import com.bms.entity.BorrowRecord;
 import com.bms.service.BorrowRecordService;
+import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * 图书管理员 - 借阅记录 REST API 控制器
@@ -36,15 +35,21 @@ public class LibrarianBorrowRecordController {
     private BorrowRecordService borrowRecordService;
 
     /**
-     * 查询所有借阅记录
+     * 分页查询所有借阅记录
      *
-     * @return 借阅记录列表
+     * @param pageNum     页码
+     * @param pageSize    每页条数
+     * @param statusGroup 状态分组（ALL/RETURNED/NOT_RETURNED/OVERDUE）
+     * @return 分页结果
      */
     @GetMapping
-    public Result<List<BorrowRecord>> getAllRecords() {
-        log.info("图书管理员 - 查询所有借阅记录");
-        List<BorrowRecord> records = borrowRecordService.getAllRecords();
-        return Result.success("查询成功", records);
+    public Result<PageInfo<BorrowRecord>> getAllRecords(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String statusGroup) {
+        log.info("图书管理员 - 分页查询借阅记录: pageNum={}, pageSize={}, statusGroup={}", pageNum, pageSize, statusGroup);
+        PageInfo<BorrowRecord> pageInfo = borrowRecordService.getAllRecordsPage(pageNum, pageSize, statusGroup);
+        return Result.success("查询成功", pageInfo);
     }
 
     /**

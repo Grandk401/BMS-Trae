@@ -25,6 +25,34 @@ import java.util.Map;
 public interface BorrowRecordMapper {
 
     /**
+     * 带条件筛选的分页查询
+     */
+    @Select({"<script>",
+            "SELECT br.*, u.username, b.title as book_name, b.isbn ",
+            "FROM borrow_record br ",
+            "LEFT JOIN user u ON br.user_id = u.id ",
+            "LEFT JOIN book b ON br.book_id = b.id ",
+            "WHERE 1=1",
+            "<if test='bookName != null and bookName != \"\"'> AND b.title LIKE CONCAT('%', #{bookName}, '%')</if>",
+            "<if test='username != null and username != \"\"'> AND u.username LIKE CONCAT('%', #{username}, '%')</if>",
+            "<if test='borrowDateStart != null'> AND br.borrow_date &gt;= #{borrowDateStart}</if>",
+            "<if test='borrowDateEnd != null'> AND br.borrow_date &lt;= #{borrowDateEnd}</if>",
+            "<if test='dueDateStart != null'> AND br.due_date &gt;= #{dueDateStart}</if>",
+            "<if test='dueDateEnd != null'> AND br.due_date &lt;= #{dueDateEnd}</if>",
+            "<if test='statusGroup == \"RETURNED\"'> AND br.status IN ('RETURNED', 'OVERDUE_RETURNED')</if>",
+            "<if test='statusGroup == \"NOT_RETURNED\"'> AND br.status IN ('PENDING', 'BORROWING', 'OVERDUE', 'REJECTED', 'RENEW_PENDING', 'RENEWED', 'RENEW_REJECTED')</if>",
+            "<if test='statusGroup == \"OVERDUE\"'> AND br.status IN ('OVERDUE', 'OVERDUE_RETURNED')</if>",
+            "ORDER BY br.borrow_date DESC",
+            "</script>"})
+    List<BorrowRecord> findByFilters(@Param("bookName") String bookName,
+                                     @Param("username") String username,
+                                     @Param("borrowDateStart") LocalDateTime borrowDateStart,
+                                     @Param("borrowDateEnd") LocalDateTime borrowDateEnd,
+                                     @Param("dueDateStart") LocalDateTime dueDateStart,
+                                     @Param("dueDateEnd") LocalDateTime dueDateEnd,
+                                     @Param("statusGroup") String statusGroup);
+
+    /**
      * 查询所有借阅记录（关联用户和图书信息）
      *
      * @return 借阅记录列表

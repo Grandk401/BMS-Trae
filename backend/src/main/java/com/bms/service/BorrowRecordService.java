@@ -18,6 +18,8 @@ import com.bms.exception.BusinessException;
 import com.bms.mapper.BookMapper;
 import com.bms.mapper.BorrowRecordMapper;
 import com.bms.mapper.UserMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,6 +70,21 @@ public class BorrowRecordService {
     }
 
     /**
+     * 分页查询所有借阅记录（带状态筛选）
+     *
+     * @param pageNum    页码
+     * @param pageSize   每页条数
+     * @param statusGroup 状态分组（ALL/RETURNED/NOT_RETURNED/OVERDUE）
+     * @return 分页结果
+     */
+    public PageInfo<BorrowRecord> getAllRecordsPage(int pageNum, int pageSize, String statusGroup) {
+        log.info("分页查询借阅记录: pageNum={}, pageSize={}, statusGroup={}", pageNum, pageSize, statusGroup);
+        PageHelper.startPage(pageNum, pageSize);
+        List<BorrowRecord> records = borrowRecordMapper.findByFilters(null, null, null, null, null, null, statusGroup);
+        return new PageInfo<>(records);
+    }
+    
+    /**
      * 根据 ID 获取借阅记录
      *
      * @param id 借阅记录 ID
@@ -82,7 +99,7 @@ public class BorrowRecordService {
         }
         return record;
     }
-
+    
     /**
      * 根据用户ID查询借阅记录（关联图书信息）
      *
@@ -94,7 +111,7 @@ public class BorrowRecordService {
         List<BorrowRecord> records = borrowRecordMapper.findByUserIdWithInfo(userId);
         return convertToDTOList(records);
     }
-
+    
     /**
      * 搜索借阅记录
      *
@@ -104,13 +121,16 @@ public class BorrowRecordService {
      * @param borrowDateEnd   借阅日期结束
      * @param dueDateStart    应归还日期开始
      * @param dueDateEnd      应归还日期结束
+     * @param statusGroup     状态分组（ALL/RETURNED/NOT_RETURNED/OVERDUE）
      * @return 借阅记录列表
      */
     public List<BorrowRecord> searchRecords(String bookName, String username,
                                             LocalDateTime borrowDateStart, LocalDateTime borrowDateEnd,
-                                            LocalDateTime dueDateStart, LocalDateTime dueDateEnd) {
-        log.info("搜索借阅记录: bookName={}, username={}", bookName, username);
-        return borrowRecordMapper.findAllWithInfo();
+                                            LocalDateTime dueDateStart, LocalDateTime dueDateEnd,
+                                            String statusGroup) {
+        log.info("搜索借阅记录: bookName={}, username={}, statusGroup={}", bookName, username, statusGroup);
+        return borrowRecordMapper.findByFilters(bookName, username,
+                borrowDateStart, borrowDateEnd, dueDateStart, dueDateEnd, statusGroup);
     }
 
     /**

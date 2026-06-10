@@ -74,7 +74,7 @@ export const searchBooks = (params) => api.get(getFullPath('/books/search'), { p
 export const getCategories = () => api.get(getFullPath('/books/categories'))
 
 // 借阅记录API（根据角色自动选择前缀）
-export const getBorrowRecords = () => api.get(getFullPath('/borrow-records'))
+export const getBorrowRecords = (params) => api.get(getFullPath('/borrow-records'), { params })
 export const getBorrowRecordById = (id) => api.get(getFullPath(`/borrow-records/${id}`))
 export const addBorrowRecord = (data) => api.post(getFullPath('/borrow-records'), data)
 export const updateBorrowRecord = (id, data) => api.put(getFullPath(`/borrow-records/${id}`), data)

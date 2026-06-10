@@ -26,6 +26,14 @@
             <span style="margin: 0 5px">至</span>
             <el-date-picker v-model="searchForm.dueDateEnd" type="date" placeholder="结束日期" />
           </el-form-item>
+          <el-form-item label="借阅状态">
+            <el-select v-model="searchForm.statusGroup" placeholder="全部" clearable style="width: 130px">
+              <el-option label="全部" value="" />
+              <el-option label="已归还" value="RETURNED" />
+              <el-option label="未归还" value="NOT_RETURNED" />
+              <el-option label="已逾期" value="OVERDUE" />
+            </el-select>
+          </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="handleSearch">搜索</el-button>
             <el-button @click="handleReset">重置</el-button>
@@ -77,6 +85,19 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <!-- 分页 -->
+      <div class="pagination-container" v-if="pageTotal > 0">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="pageNum"
+          :page-sizes="[5, 10, 20, 50]"
+          :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="pageTotal">
+        </el-pagination>
+      </div>
     </el-card>
   </div>
 </template>
@@ -88,6 +109,11 @@ import { getBorrowRecords, approveBorrow, rejectBorrow, confirmReturn, searchBor
 
 const loading = ref(false)
 const records = ref([])
+
+// 分页状态
+const pageNum = ref(1)
+const pageSize = ref(10)
+const pageTotal = ref(0)
 let isMounted = ref(false)
 
 const searchForm = reactive({
@@ -96,7 +122,8 @@ const searchForm = reactive({
   borrowDateStart: null,
   borrowDateEnd: null,
   dueDateStart: null,
-  dueDateEnd: null
+  dueDateEnd: null,
+  statusGroup: ''
 })
 
 const fetchRecords = async (isSearch = false) => {
@@ -104,21 +131,26 @@ const fetchRecords = async (isSearch = false) => {
   loading.value = true
   try {
     let res
+    const params = {
+      pageNum: pageNum.value,
+      pageSize: pageSize.value,
+      statusGroup: searchForm.statusGroup || undefined
+    }
     if (isSearch) {
-      const params = {
-        bookName: searchForm.bookName || undefined,
-        username: searchForm.username || undefined,
-        borrowDateStart: searchForm.borrowDateStart ? new Date(searchForm.borrowDateStart).toISOString() : undefined,
-        borrowDateEnd: searchForm.borrowDateEnd ? new Date(searchForm.borrowDateEnd).toISOString() : undefined,
-        dueDateStart: searchForm.dueDateStart ? new Date(searchForm.dueDateStart).toISOString() : undefined,
-        dueDateEnd: searchForm.dueDateEnd ? new Date(searchForm.dueDateEnd).toISOString() : undefined
-      }
+      params.bookName = searchForm.bookName || undefined
+      params.username = searchForm.username || undefined
+      params.borrowDateStart = searchForm.borrowDateStart ? new Date(searchForm.borrowDateStart).toISOString() : undefined
+      params.borrowDateEnd = searchForm.borrowDateEnd ? new Date(searchForm.borrowDateEnd).toISOString() : undefined
+      params.dueDateStart = searchForm.dueDateStart ? new Date(searchForm.dueDateStart).toISOString() : undefined
+      params.dueDateEnd = searchForm.dueDateEnd ? new Date(searchForm.dueDateEnd).toISOString() : undefined
       res = await searchBorrowRecords(params)
     } else {
-      res = await getBorrowRecords()
+      res = await getBorrowRecords(params)
     }
     if (res.success && isMounted.value) {
-      records.value = res.data || []
+      // PageInfo 数据结构：{ list: [], total: N, pageNum: N, pageSize: N, ... }
+      records.value = res.data?.list || []
+      pageTotal.value = res.data?.total || 0
     }
   } catch (error) {
     if (isMounted.value) {
@@ -132,6 +164,7 @@ const fetchRecords = async (isSearch = false) => {
 }
 
 const handleSearch = () => {
+  pageNum.value = 1
   fetchRecords(true)
 }
 
@@ -142,6 +175,19 @@ const handleReset = () => {
   searchForm.borrowDateEnd = null
   searchForm.dueDateStart = null
   searchForm.dueDateEnd = null
+  searchForm.statusGroup = ''
+  pageNum.value = 1
+  fetchRecords()
+}
+
+const handleSizeChange = (size) => {
+  pageSize.value = size
+  pageNum.value = 1
+  fetchRecords()
+}
+
+const handleCurrentChange = (page) => {
+  pageNum.value = page
   fetchRecords()
 }
 
@@ -282,5 +328,12 @@ onUnmounted(() => {
 .overdue-text {
   color: #f56c6c;
   font-weight: bold;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 10px 0;
 }
 </style>
