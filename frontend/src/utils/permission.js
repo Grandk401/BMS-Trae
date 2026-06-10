@@ -51,6 +51,7 @@ export const RolePermissions = {
     PermissionCode.USER_CREATE, PermissionCode.USER_READ, PermissionCode.USER_UPDATE, PermissionCode.USER_DELETE,
     PermissionCode.BOOK_CREATE, PermissionCode.BOOK_READ, PermissionCode.BOOK_UPDATE, PermissionCode.BOOK_DELETE,
     PermissionCode.BORROW_CREATE, PermissionCode.BORROW_READ, PermissionCode.BORROW_UPDATE, PermissionCode.BORROW_DELETE,
+    PermissionCode.BORROW_READ_OWN, PermissionCode.BORROW_CREATE_OWN,
     PermissionCode.ROLE_CREATE, PermissionCode.ROLE_READ, PermissionCode.ROLE_UPDATE, PermissionCode.ROLE_DELETE,
     PermissionCode.PERMISSION_CREATE, PermissionCode.PERMISSION_READ, PermissionCode.PERMISSION_UPDATE, PermissionCode.PERMISSION_DELETE,
     PermissionCode.SYSTEM_CONFIG
@@ -58,7 +59,8 @@ export const RolePermissions = {
   [RoleCode.LIBRARIAN]: [
     PermissionCode.USER_READ, PermissionCode.USER_READ_OWN, PermissionCode.USER_UPDATE_OWN,
     PermissionCode.BOOK_CREATE, PermissionCode.BOOK_READ, PermissionCode.BOOK_UPDATE, PermissionCode.BOOK_DELETE,
-    PermissionCode.BORROW_CREATE, PermissionCode.BORROW_READ, PermissionCode.BORROW_UPDATE
+    PermissionCode.BORROW_CREATE, PermissionCode.BORROW_READ, PermissionCode.BORROW_UPDATE,
+    PermissionCode.BORROW_READ_OWN, PermissionCode.BORROW_CREATE_OWN
   ],
   [RoleCode.READER]: [
     PermissionCode.USER_READ_OWN, PermissionCode.USER_UPDATE_OWN,

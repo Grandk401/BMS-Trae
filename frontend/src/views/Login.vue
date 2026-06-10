@@ -1,7 +1,7 @@
 <template>
   <div class="login-container" @keyup.enter="handleLogin">
     <el-card class="login-card">
-      <h2 class="title">图书管理系统</h2>
+      <h2 class="title">图书馆在线系统</h2>
       <el-form :model="loginForm" :rules="rules" ref="loginFormRef">
         <el-form-item prop="username">
           <el-input

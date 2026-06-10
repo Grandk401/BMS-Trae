@@ -26,6 +26,12 @@
           <el-menu-item index="/dashboard/borrow-records" v-if="showBorrowRecordsMenu">
             <span>借阅管理</span>
           </el-menu-item>
+          <el-menu-item index="/dashboard/reader-borrow" v-if="showAdminOwnBorrowMenu">
+            <span>我的借阅</span>
+          </el-menu-item>
+          <el-menu-item index="/dashboard/ai-chat">
+            <span>AI 助手</span>
+          </el-menu-item>
           <el-menu-item index="/dashboard/reader-borrow" v-if="showReaderBorrowMenu">
             <span>我的借阅</span>
           </el-menu-item>
@@ -47,7 +53,7 @@
       <el-container>
         <el-header>
           <div class="header-content">
-            <h3>图书管理系统 - {{ roleName }}</h3>
+            <h3>{{ systemTitle }} - {{ roleName }}</h3>
             <div class="user-info">
               <span>欢迎，{{ username }}</span>
               <el-button type="danger" size="small" @click="handleLogout">退出</el-button>
@@ -85,6 +91,11 @@ const roleName = computed(() => {
   return roleNames[role.value] || '未知角色'
 })
 
+const systemTitle = computed(() => {
+  // 读者显示"图书馆在线系统"，其他角色显示"图书管理系统"
+  return role.value === RoleCode.READER ? '图书馆在线系统' : '图书管理系统'
+})
+
 const showBooksMenu = computed(() => hasPermission(PermissionCode.BOOK_READ))
 const showBorrowRecordsMenu = computed(() => hasPermission(PermissionCode.BORROW_READ))
 const showUsersMenu = computed(() => hasPermission(PermissionCode.USER_READ))
@@ -92,6 +103,8 @@ const showSettingsMenu = computed(() => hasPermission(PermissionCode.SYSTEM_CONF
 const showReaderBooksMenu = computed(() => hasPermission(PermissionCode.BORROW_READ_OWN) && !hasPermission(PermissionCode.BORROW_READ))
 const showReaderBorrowMenu = computed(() => hasPermission(PermissionCode.BORROW_READ_OWN))
 const showStatisticsMenu = computed(() => hasPermission(PermissionCode.BORROW_READ))
+// 管理员和图书管理员也可以查看自己的借阅记录
+const showAdminOwnBorrowMenu = computed(() => hasPermission(PermissionCode.BORROW_READ) && hasPermission(PermissionCode.BORROW_READ_OWN))
 
 onMounted(() => {
   username.value = localStorage.getItem('username') || 'User'
@@ -103,6 +116,8 @@ const handleLogout = () => {
   localStorage.removeItem('username')
   localStorage.removeItem('role')
   localStorage.removeItem('userId')
+  // 清除 AI 聊天会话 ID，确保换账号后重新开始会话
+  sessionStorage.removeItem('aiSessionId')
   ElMessage.success('已退出登录')
   router.push('/login')
 }

@@ -41,4 +41,14 @@ public interface UserMapper {
      * @return 用户列表
      */
     List<User> searchUsers(UserSearchDTO dto);
+
+    /**
+     * 更新 AI 聊天计数
+     *
+     * @param userId 用户ID
+     * @param count  计数
+     * @param date   日期
+     */
+    @Update("UPDATE user SET ai_chat_count = #{count}, ai_chat_date = #{date} WHERE id = #{userId}")
+    void updateAiChatCount(Integer userId, Integer count, java.time.LocalDate date);
 }

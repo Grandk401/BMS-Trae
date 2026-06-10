@@ -39,3 +39,12 @@ jwt:
 
 # 引入外部敏感配置文件
 spring.config.import: optional:application-private.yml
+
+# AI Chat Configuration (Spring AI)
+# 支持: 通义千问(qwen-turbo)/文心一言(ernie-bot)/ChatGLM
+ai:
+  provider: ${AI_PROVIDER:qwen}  # qwen | ernie | chatglm
+  api-key: ${AI_API_KEY:your-api-key-here}
+  base-url: ${AI_BASE_URL:}  # 国内AI通常不需要填写
+  model: ${AI_MODEL:qwen-turbo}
+  daily-limit: 10

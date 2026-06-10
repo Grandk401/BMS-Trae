@@ -32,6 +32,14 @@ public interface BookMapper {
     List<Book> findAll();
 
     /**
+     * 查询所有在馆图书（库存大于 0）
+     *
+     * @return 在馆图书列表
+     */
+    @Select("SELECT * FROM book WHERE stock > 0 ORDER BY create_time DESC")
+    List<Book> findAvailableBooks();
+
+    /**
      * 根据 ID 查询图书
      *
      * @param id 图书 ID
@@ -48,6 +56,15 @@ public interface BookMapper {
      */
     @Select("SELECT * FROM book WHERE isbn = #{isbn}")
     Book findByIsbn(String isbn);
+
+    /**
+     * 根据标题精确查询图书
+     *
+     * @param title 图书标题
+     * @return 图书对象
+     */
+    @Select("SELECT * FROM book WHERE title = #{title} LIMIT 1")
+    Book findByTitle(String title);
 
     /**
      * 插入新图书

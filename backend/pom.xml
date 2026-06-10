@@ -108,6 +108,13 @@
             <artifactId>poi-ooxml</artifactId>
             <version>4.1.2</version>
         </dependency>
+
+        <!-- OkHttp for API calls (使用 OpenAI 兼容接口调用国内AI) -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.10.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -157,4 +164,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

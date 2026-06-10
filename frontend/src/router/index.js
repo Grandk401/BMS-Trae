@@ -12,6 +12,7 @@ import HomeOrReaderHome from '../views/HomeOrReaderHome.vue'
 import AnnouncementManager from '../views/AnnouncementManager.vue'
 import OperationLogs from '../views/OperationLogs.vue'
 import Statistics from '../views/Statistics.vue'
+import AiChat from '../views/AiChat.vue'
 import { canAccessRoute } from '../utils/permission'
 
 const routes = [
@@ -77,6 +78,12 @@ const routes = [
         name: 'Statistics',
         component: Statistics,
         meta: { permission: 'borrow:read' }
+      },
+      {
+        path: 'ai-chat',
+        name: 'AiChat',
+        component: AiChat,
+        meta: { requiresAuth: true }
       },
       {
         path: 'reader-books',

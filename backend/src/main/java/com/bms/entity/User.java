@@ -11,6 +11,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 
 /**
  * 用户实体类
@@ -34,4 +35,8 @@ public class User implements Serializable {
     private String role;
 
     private Boolean enabled = true;
+
+    // AI 聊天相关字段
+    private Integer aiChatCount = 0;    // 今日 AI 聊天次数
+    private LocalDate aiChatDate;       // AI 聊天计数日期
 }
