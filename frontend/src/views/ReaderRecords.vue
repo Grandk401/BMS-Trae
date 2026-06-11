@@ -9,8 +9,8 @@
 
       <el-table :data="records" style="width: 100%" v-loading="loading">
         <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column prop="bookTitle" label="书名" min-width="180" />
-        <el-table-column prop="bookIsbn" label="ISBN" width="120" />
+        <el-table-column prop="bookName" label="书名" min-width="180" />
+        <el-table-column prop="isbn" label="ISBN" width="120" />
         <el-table-column prop="borrowDate" label="借阅日期" width="160">
           <template #default="scope">
             {{ formatDateTime(scope.row.borrowDate) }}
@@ -123,7 +123,10 @@ const fetchRecords = async () => {
   try {
     const res = await getBorrowRecords()
     if (res.success && isMounted.value) {
-      records.value = res.data || []
+      const list = res.data?.list || res.data
+      records.value = Array.isArray(list) ? list : []
+    } else if (isMounted.value) {
+      records.value = []
     }
   } catch (error) {
     if (isMounted.value) {

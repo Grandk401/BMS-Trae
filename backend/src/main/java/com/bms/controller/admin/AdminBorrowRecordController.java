@@ -69,19 +69,23 @@ public class AdminBorrowRecordController {
     }
 
     /**
-     * 搜索借阅记录
+     * 搜索借阅记录（支持分页）
      *
-     * @param bookName       图书名
-     * @param username       用户名
-     * @param borrowDateStart 借阅日期开始
-     * @param borrowDateEnd   借阅日期结束
-     * @param dueDateStart    应归还日期开始
-     * @param dueDateEnd      应归还日期结束
-     * @param statusGroup     状态分组（ALL/RETURNED/NOT_RETURNED/OVERDUE）
-     * @return 借阅记录列表
+     * @param pageNum          页码
+     * @param pageSize         每页条数
+     * @param bookName         图书名
+     * @param username         用户名
+     * @param borrowDateStart  借阅日期开始
+     * @param borrowDateEnd    借阅日期结束
+     * @param dueDateStart     应归还日期开始
+     * @param dueDateEnd       应归还日期结束
+     * @param statusGroup      状态分组（ALL/RETURNED/NOT_RETURNED/OVERDUE）
+     * @return 分页结果
      */
     @GetMapping("/search")
-    public Result<List<BorrowRecord>> searchRecords(
+    public Result<PageInfo<BorrowRecord>> searchRecords(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String bookName,
             @RequestParam(required = false) String username,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime borrowDateStart,
@@ -89,10 +93,11 @@ public class AdminBorrowRecordController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dueDateStart,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dueDateEnd,
             @RequestParam(required = false) String statusGroup) {
-        log.info("系统管理员 - 搜索借阅记录: bookName={}, username={}, statusGroup={}", bookName, username, statusGroup);
-        List<BorrowRecord> records = borrowRecordService.searchRecords(
-                bookName, username, borrowDateStart, borrowDateEnd, dueDateStart, dueDateEnd, statusGroup);
-        return Result.success("查询成功", records);
+        log.info("系统管理员 - 分页搜索借阅记录: pageNum={}, pageSize={}, bookName={}, username={}, statusGroup={}",
+                pageNum, pageSize, bookName, username, statusGroup);
+        PageInfo<BorrowRecord> pageInfo = borrowRecordService.searchRecordsPage(
+                pageNum, pageSize, bookName, username, borrowDateStart, borrowDateEnd, dueDateStart, dueDateEnd, statusGroup);
+        return Result.success("查询成功", pageInfo);
     }
 
     /**

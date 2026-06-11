@@ -53,6 +53,20 @@
       <el-table :data="books" style="width: 100%" v-loading="loading">
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="isbn" label="ISBN" width="120" />
+        <el-table-column label="封面" width="80">
+          <template #default="scope">
+            <el-avatar
+              v-if="scope.row.coverImage"
+              :src="scope.row.coverImage"
+              :size="50"
+              shape="square"
+              @error="(e) => e.target.style.display = 'none'"
+            />
+            <el-avatar v-else :size="50" shape="square" style="background: #f5f7fa;">
+              <el-icon :size="24"><Notebook /></el-icon>
+            </el-avatar>
+          </template>
+        </el-table-column>
         <el-table-column prop="title" label="书名" width="150" />
         <el-table-column prop="author" label="作者" width="120" />
         <el-table-column prop="publisher" label="出版社" width="150" />
@@ -94,6 +108,18 @@
         <el-form-item label="描述" prop="description">
           <el-input v-model="bookForm.description" type="textarea" :rows="3" />
         </el-form-item>
+        <el-form-item label="封面图片" prop="coverImage">
+          <el-upload
+            class="cover-uploader"
+            :show-file-list="false"
+            :before-upload="beforeCoverUpload"
+            :http-request="handleCoverUpload"
+          >
+            <img v-if="bookForm.coverImage" :src="bookForm.coverImage" class="cover-image" />
+            <el-icon v-else class="cover-uploader-icon"><Plus /></el-icon>
+          </el-upload>
+          <div class="upload-tip">支持 JPG、PNG 格式，最大 5MB</div>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -106,7 +132,8 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getBooks, addBook, updateBook, deleteBook, searchBooks, getCategories } from '@/api'
+import { Plus, Notebook } from '@element-plus/icons-vue'
+import { getBooks, addBook, updateBook, deleteBook, searchBooks, getCategories, uploadBookCover } from '@/api'
 import { hasPermission, PermissionCode } from '../utils/permission'
 
 const loading = ref(false)
@@ -116,6 +143,7 @@ const dialogTitle = ref('添加图书')
 const bookFormRef = ref(null)
 const categories = ref([])
 const categoriesLoading = ref(false)
+const uploadLoading = ref(false)
 
 const searchForm = reactive({
   title: '',
@@ -134,12 +162,47 @@ const bookForm = reactive({
   category: '',
   price: 0,
   stock: 0,
-  description: ''
+  description: '',
+  coverImage: ''
 })
 
 const rules = {
   title: [{ required: true, message: '请输入书名', trigger: 'blur' }],
   author: [{ required: true, message: '请输入作者', trigger: 'blur' }]
+}
+
+// 封面上传相关
+const beforeCoverUpload = (file) => {
+  const isImage = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png'
+  const isLt5M = file.size / 1024 / 1024 < 5
+
+  if (!isImage) {
+    ElMessage.error('只能上传 JPG/PNG 格式的图片!')
+    return false
+  }
+  if (!isLt5M) {
+    ElMessage.error('图片大小不能超过 5MB!')
+    return false
+  }
+  return true
+}
+
+const handleCoverUpload = async (options) => {
+  const { file } = options
+  uploadLoading.value = true
+  try {
+    const res = await uploadBookCover(file)
+    if (res.success) {
+      bookForm.coverImage = res.data
+      ElMessage.success('封面上传成功')
+    } else {
+      ElMessage.error(res.message || '上传失败')
+    }
+  } catch (error) {
+    ElMessage.error('上传失败: ' + (error.message || '未知错误'))
+  } finally {
+    uploadLoading.value = false
+  }
 }
 
 // 权限判断
@@ -280,5 +343,45 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.cover-uploader {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s;
+  width: 148px;
+  height: 148px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cover-uploader:hover {
+  border-color: #409eff;
+}
+
+.cover-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 148px;
+  height: 148px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cover-image {
+  width: 148px;
+  height: 148px;
+  object-fit: cover;
+}
+
+.upload-tip {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 5px;
 }
 </style>

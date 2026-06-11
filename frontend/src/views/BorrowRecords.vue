@@ -29,6 +29,7 @@
           <el-form-item label="借阅状态">
             <el-select v-model="searchForm.statusGroup" placeholder="全部" clearable style="width: 130px">
               <el-option label="全部" value="" />
+              <el-option label="待审核" value="PENDING" />
               <el-option label="已归还" value="RETURNED" />
               <el-option label="未归还" value="NOT_RETURNED" />
               <el-option label="已逾期" value="OVERDUE" />
@@ -149,8 +150,12 @@ const fetchRecords = async (isSearch = false) => {
     }
     if (res.success && isMounted.value) {
       // PageInfo 数据结构：{ list: [], total: N, pageNum: N, pageSize: N, ... }
-      records.value = res.data?.list || []
-      pageTotal.value = res.data?.total || 0
+      const list = res.data?.list
+      records.value = Array.isArray(list) ? list : []
+      pageTotal.value = typeof res.data?.total === 'number' ? res.data.total : 0
+    } else if (isMounted.value) {
+      records.value = []
+      pageTotal.value = 0
     }
   } catch (error) {
     if (isMounted.value) {

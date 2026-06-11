@@ -16,6 +16,7 @@
         <result column="price" property="price"/>
         <result column="stock" property="stock"/>
         <result column="description" property="description"/>
+        <result column="cover_image" property="coverImage"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>

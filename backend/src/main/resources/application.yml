@@ -25,6 +25,13 @@ spring:
       initial-size: 5
       min-idle: 5
       max-active: 20
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 10MB
+  resources:
+    static-locations: classpath:/static/,file:uploads/
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
@@ -48,3 +55,18 @@ ai:
   base-url: ${AI_BASE_URL:}  # 国内AI通常不需要填写
   model: ${AI_MODEL:qwen-turbo}
   daily-limit: 10
+
+# 阿里云OSS对象存储配置
+oss:
+  enabled: ${OSS_ENABLED:false}
+  endpoint: ${OSS_ENDPOINT:oss-cn-hangzhou.aliyuncs.com}
+  access-key-id: ${OSS_ACCESS_KEY_ID:your-access-key-id}
+  access-key-secret: ${OSS_ACCESS_KEY_SECRET:your-access-key-secret}
+  bucket-name: ${OSS_BUCKET_NAME:your-bucket-name}
+  custom-domain: ${OSS_CUSTOM_DOMAIN:}
+  base-path: books/
+
+# 本地文件存储路径（OSS未启用时使用）
+file:
+  storage:
+    local-path: uploads

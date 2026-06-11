@@ -4,7 +4,6 @@ import Dashboard from '../views/Dashboard.vue'
 import Books from '../views/Books.vue'
 import BorrowRecords from '../views/BorrowRecords.vue'
 import Users from '../views/Users.vue'
-import Settings from '../views/Settings.vue'
 import ReaderBooks from '../views/ReaderBooks.vue'
 import ReaderRecords from '../views/ReaderRecords.vue'
 import ReaderHome from '../views/ReaderHome.vue'
@@ -13,6 +12,7 @@ import AnnouncementManager from '../views/AnnouncementManager.vue'
 import OperationLogs from '../views/OperationLogs.vue'
 import Statistics from '../views/Statistics.vue'
 import AiChat from '../views/AiChat.vue'
+import AdminAiChat from '../views/AdminAiChat.vue'
 import { canAccessRoute } from '../utils/permission'
 
 const routes = [
@@ -56,12 +56,6 @@ const routes = [
         meta: { permission: 'user:read' }
       },
       {
-        path: 'settings',
-        name: 'Settings',
-        component: Settings,
-        meta: { permission: 'system:config' }
-      },
-      {
         path: 'announcements',
         name: 'Announcements',
         component: AnnouncementManager,
@@ -82,8 +76,14 @@ const routes = [
       {
         path: 'ai-chat',
         name: 'AiChat',
+        component: AdminAiChat,
+        meta: { requiresAuth: true, permission: 'borrow:read' }
+      },
+      {
+        path: 'reader-ai-chat',
+        name: 'ReaderAiChat',
         component: AiChat,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, permission: 'borrow:read:own' }
       },
       {
         path: 'reader-books',

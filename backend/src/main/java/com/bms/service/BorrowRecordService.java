@@ -113,15 +113,42 @@ public class BorrowRecordService {
     }
     
     /**
-     * 搜索借阅记录
+     * 搜索借阅记录（支持分页）
      *
-     * @param bookName      图书名
-     * @param username      用户名
-     * @param borrowDateStart 借阅日期开始
-     * @param borrowDateEnd   借阅日期结束
-     * @param dueDateStart    应归还日期开始
-     * @param dueDateEnd      应归还日期结束
-     * @param statusGroup     状态分组（ALL/RETURNED/NOT_RETURNED/OVERDUE）
+     * @param pageNum          页码
+     * @param pageSize         每页条数
+     * @param bookName         图书名
+     * @param username         用户名
+     * @param borrowDateStart  借阅日期开始
+     * @param borrowDateEnd    借阅日期结束
+     * @param dueDateStart     应归还日期开始
+     * @param dueDateEnd       应归还日期结束
+     * @param statusGroup      状态分组（ALL/RETURNED/NOT_RETURNED/OVERDUE）
+     * @return 分页结果
+     */
+    public PageInfo<BorrowRecord> searchRecordsPage(int pageNum, int pageSize,
+                                                     String bookName, String username,
+                                                     LocalDateTime borrowDateStart, LocalDateTime borrowDateEnd,
+                                                     LocalDateTime dueDateStart, LocalDateTime dueDateEnd,
+                                                     String statusGroup) {
+        log.info("分页搜索借阅记录: pageNum={}, pageSize={}, bookName={}, username={}, statusGroup={}",
+                pageNum, pageSize, bookName, username, statusGroup);
+        PageHelper.startPage(pageNum, pageSize);
+        List<BorrowRecord> records = borrowRecordMapper.findByFilters(bookName, username,
+                borrowDateStart, borrowDateEnd, dueDateStart, dueDateEnd, statusGroup);
+        return new PageInfo<>(records);
+    }
+
+    /**
+     * 搜索借阅记录（不分页）
+     *
+     * @param bookName         图书名
+     * @param username         用户名
+     * @param borrowDateStart  借阅日期开始
+     * @param borrowDateEnd    借阅日期结束
+     * @param dueDateStart     应归还日期开始
+     * @param dueDateEnd       应归还日期结束
+     * @param statusGroup      状态分组（ALL/RETURNED/NOT_RETURNED/OVERDUE）
      * @return 借阅记录列表
      */
     public List<BorrowRecord> searchRecords(String bookName, String username,

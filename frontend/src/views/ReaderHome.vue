@@ -8,7 +8,7 @@
       </template>
       <div class="welcome-content">
         <div class="hero-section">
-          <h1>📚 图书管理系统</h1>
+          <h1>📚 图书在线系统</h1>
           <p class="subtitle">Library Management System</p>
         </div>
         

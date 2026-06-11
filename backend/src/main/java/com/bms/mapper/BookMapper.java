@@ -72,8 +72,8 @@ public interface BookMapper {
      * @param book 图书对象
      * @return 影响的行数
      */
-    @Insert("INSERT INTO book(isbn, title, author, publisher, publish_date, category, price, stock, description) " +
-            "VALUES(#{isbn}, #{title}, #{author}, #{publisher}, #{publishDate}, #{category}, #{price}, #{stock}, #{description})")
+    @Insert("INSERT INTO book(isbn, title, author, publisher, publish_date, category, price, stock, description, cover_image) " +
+            "VALUES(#{isbn}, #{title}, #{author}, #{publisher}, #{publishDate}, #{category}, #{price}, #{stock}, #{description}, #{coverImage})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Book book);
 
@@ -85,7 +85,7 @@ public interface BookMapper {
      */
     @Update("UPDATE book SET isbn=#{isbn}, title=#{title}, author=#{author}, publisher=#{publisher}, " +
             "publish_date=#{publishDate}, category=#{category}, price=#{price}, stock=#{stock}, description=#{description}, " +
-            "update_time=NOW() WHERE id=#{id}")
+            "cover_image=#{coverImage}, update_time=NOW() WHERE id=#{id}")
     int update(Book book);
 
     /**

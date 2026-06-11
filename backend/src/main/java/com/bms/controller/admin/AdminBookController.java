@@ -17,10 +17,12 @@ import com.bms.common.validation.ValidationGroup;
 import com.bms.dto.BookSearchDTO;
 import com.bms.entity.Book;
 import com.bms.service.BookService;
+import com.bms.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -35,6 +37,9 @@ public class AdminBookController {
 
     @Autowired
     private BookService bookService;
+
+    @Autowired
+    private FileStorageService fileStorageService;
 
     /**
      * 查询所有图书
@@ -129,5 +134,25 @@ public class AdminBookController {
         log.info("系统管理员 - 查询所有图书分类");
         List<String> categories = bookService.getAllCategories();
         return Result.success("查询成功", categories);
+    }
+
+    /**
+     * 上传图书封面图片
+     *
+     * @param file 图片文件
+     * @return 图片URL
+     */
+    @PostMapping("/upload-cover")
+    @OperationLogging(module = "BOOK", type = "UPLOAD", description = "上传图书封面")
+    public Result<String> uploadCover(@RequestParam("file") MultipartFile file) {
+        log.info("上传图书封面图片: originalFilename={}, size={}",
+                file.getOriginalFilename(), file.getSize());
+        try {
+            String url = fileStorageService.uploadImage(file, "books");
+            return Result.success("上传成功", url);
+        } catch (Exception e) {
+            log.error("上传失败: {}", e.getMessage());
+            return Result.error("上传失败: " + e.getMessage());
+        }
     }
 }

@@ -35,6 +35,14 @@ public interface UserMapper {
     int deleteById(Integer id);
 
     /**
+     * 统计用户总数
+     *
+     * @return 用户总数
+     */
+    @Select("SELECT COUNT(*) FROM user")
+    int countAll();
+
+    /**
      * 动态搜索用户列表
      *
      * @param dto 搜索条件

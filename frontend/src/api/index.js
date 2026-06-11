@@ -73,6 +73,21 @@ export const deleteBook = (id) => api.delete(getFullPath(`/books/${id}`))
 export const searchBooks = (params) => api.get(getFullPath('/books/search'), { params })
 export const getCategories = () => api.get(getFullPath('/books/categories'))
 
+// 图书封面上传API
+export const uploadBookCover = (file) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return api.post('/admin/books/upload-cover', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+// 读者图书浏览API（分页）
+export const getBooksPage = (params) => api.get('/reader/books/page', { params })
+export const searchBooksPage = (params) => api.get('/reader/books/page', { params })
+
 // 借阅记录API（根据角色自动选择前缀）
 export const getBorrowRecords = (params) => api.get(getFullPath('/borrow-records'), { params })
 export const getBorrowRecordById = (id) => api.get(getFullPath(`/borrow-records/${id}`))

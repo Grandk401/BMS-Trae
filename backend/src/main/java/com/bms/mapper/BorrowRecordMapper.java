@@ -40,10 +40,16 @@ public interface BorrowRecordMapper {
             "<if test='dueDateStart != null'> AND br.due_date &gt;= #{dueDateStart}</if>",
             "<if test='dueDateEnd != null'> AND br.due_date &lt;= #{dueDateEnd}</if>",
             "<if test='statusGroup == \"RETURNED\"'> AND br.status IN ('RETURNED', 'OVERDUE_RETURNED')</if>",
-            "<if test='statusGroup == \"NOT_RETURNED\"'> AND br.status IN ('PENDING', 'BORROWING', 'OVERDUE', 'REJECTED', 'RENEW_PENDING', 'RENEWED', 'RENEW_REJECTED')</if>",
+            "<if test='statusGroup == \"NOT_RETURNED\"'> AND br.status IN ('BORROWING', 'OVERDUE', 'REJECTED', 'RENEW_PENDING', 'RENEWED', 'RENEW_REJECTED')</if>",
+            "<if test='statusGroup == \"PENDING\"'> AND br.status = 'PENDING'</if>",
             "<if test='statusGroup == \"OVERDUE\"'> AND br.status IN ('OVERDUE', 'OVERDUE_RETURNED')</if>",
             "ORDER BY br.borrow_date DESC",
             "</script>"})
+    @Results({
+        @Result(property = "bookName", column = "book_name"),
+        @Result(property = "isbn", column = "isbn"),
+        @Result(property = "username", column = "username")
+    })
     List<BorrowRecord> findByFilters(@Param("bookName") String bookName,
                                      @Param("username") String username,
                                      @Param("borrowDateStart") LocalDateTime borrowDateStart,
@@ -62,6 +68,11 @@ public interface BorrowRecordMapper {
             "LEFT JOIN user u ON br.user_id = u.id " +
             "LEFT JOIN book b ON br.book_id = b.id " +
             "ORDER BY br.borrow_date DESC")
+    @Results({
+        @Result(property = "bookName", column = "book_name"),
+        @Result(property = "isbn", column = "isbn"),
+        @Result(property = "username", column = "username")
+    })
     List<BorrowRecord> findAllWithInfo();
 
     /**
@@ -75,6 +86,11 @@ public interface BorrowRecordMapper {
             "LEFT JOIN user u ON br.user_id = u.id " +
             "LEFT JOIN book b ON br.book_id = b.id " +
             "WHERE br.id = #{id}")
+    @Results({
+        @Result(property = "bookName", column = "book_name"),
+        @Result(property = "isbn", column = "isbn"),
+        @Result(property = "username", column = "username")
+    })
     BorrowRecord findByIdWithInfo(Integer id);
 
     /**
@@ -229,6 +245,15 @@ public interface BorrowRecordMapper {
      */
     @Select("SELECT COUNT(*) FROM borrow_record")
     int countAllRecords();
+
+    /**
+     * 根据状态统计数量
+     *
+     * @param status 状态
+     * @return 数量
+     */
+    @Select("SELECT COUNT(*) FROM borrow_record WHERE status = #{status}")
+    int countByStatus(String status);
 
     /**
      * 获取近N天借阅趋势

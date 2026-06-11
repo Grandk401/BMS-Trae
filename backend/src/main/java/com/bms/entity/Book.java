@@ -90,6 +90,11 @@ public class Book implements Serializable {
     private String description;
 
     /**
+     * 封面图片URL
+     */
+    private String coverImage;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;

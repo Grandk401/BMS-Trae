@@ -83,4 +83,23 @@ public class ReaderBookController {
         List<String> categories = bookService.getAllCategories();
         return Result.success("查询成功", categories);
     }
+
+    /**
+     * 分页查询图书
+     *
+     * @param page     页码
+     * @param size     每页大小
+     * @param dto      搜索条件
+     * @return 分页结果
+     */
+    @GetMapping("/page")
+    public Result<com.github.pagehelper.PageInfo<Book>> getBooksPage(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "12") int size,
+            BookSearchDTO dto) {
+        log.info("普通读者 - 分页查询图书: page={}, size={}, title={}, author={}, category={}",
+                page, size, dto.getTitle(), dto.getAuthor(), dto.getCategory());
+        com.github.pagehelper.PageInfo<Book> pageInfo = bookService.getBooksPage(page, size, dto);
+        return Result.success("查询成功", pageInfo);
+    }
 }

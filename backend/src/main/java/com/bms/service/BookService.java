@@ -14,6 +14,8 @@ import com.bms.dto.BookSearchDTO;
 import com.bms.entity.Book;
 import com.bms.exception.BusinessException;
 import com.bms.mapper.BookMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -156,5 +158,23 @@ public class BookService {
         List<String> categories = bookMapper.findAllCategories();
         log.info("查询到分类数量: {}", categories.size());
         return categories;
+    }
+
+    /**
+     * 分页查询图书
+     *
+     * @param page 页码
+     * @param size 每页大小
+     * @param dto  搜索条件
+     * @return 分页结果
+     */
+    public PageInfo<Book> getBooksPage(int page, int size, BookSearchDTO dto) {
+        log.info("分页查询图书: page={}, size={}, title={}, author={}, category={}, publisher={}",
+                page, size, dto.getTitle(), dto.getAuthor(), dto.getCategory(), dto.getPublisher());
+        PageHelper.startPage(page, size);
+        List<Book> books = bookMapper.searchBooks(dto);
+        PageInfo<Book> pageInfo = new PageInfo<>(books);
+        log.info("分页查询结果: 总数={}, 当前页={}, 每页={}", pageInfo.getTotal(), page, size);
+        return pageInfo;
     }
 }
